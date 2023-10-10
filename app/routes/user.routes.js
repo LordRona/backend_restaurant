@@ -1,5 +1,6 @@
 const { authJwt } = require("../middlewares");
 const controller = require("../controllers/user.controller");
+const suspend = require("../controllers/userController");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -24,5 +25,11 @@ module.exports = function(app) {
     "/api/test/admin",
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard
+  );
+
+  app.put(
+    "/api/test/suspend",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    suspend.suspendAccount
   );
 };

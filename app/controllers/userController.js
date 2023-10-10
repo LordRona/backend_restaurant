@@ -1,5 +1,4 @@
 const User = require("../models/user.model");
-const { StatusCode } = require("http-status-code");
 const { VerifyToken } = require("../middlewares/authJwt");
 
 const Signin = require("../controllers/auth.controller");
@@ -45,9 +44,23 @@ const updateUserNameAndPhone = async (req, res) =>{
     Signin.signin({ res, user: tokenUser });
 }
 
+const suspendAccount = async (req, res) =>{
+
+        const { id } = req.params;
+        User.findByIdAndUpdate(id, { suspended: true }, { new: true }).then((user) => {
+            if(user){
+                res.status(200).json({ user });
+            }else{
+                res.status(400).json({ message: "User not found!" });
+            }
+        }).catch (error => { res.status(404).json({ message: "Error occured while trying to Suspend User!"})
+    });
+};
+
 
 module.exports = {
     updateUserPassword,
     updateUserNameAndPhone,
     showCurrentUser,
+    suspendAccount,
 }

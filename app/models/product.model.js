@@ -11,31 +11,46 @@ const products = new mongoose.Schema({
         type: String,
         required: [true, "Please provide product description"],
         maxlength: [1000, "Decription can not exceed 1000 characters"],
-
     },
     price: { 
         type: Number,
         required: [true, "Please provide price"],
         default: 0,
     },
+    category: {
+        type: String,
+        ref: "Category",
+        required: [true, "Please provide category field"],
+        enum: ["all", "fruits", "african", "foriegn"],
+        default: "all"
+    },
     image: {
         type: String,
         default: "/uploads/example.jpeg",
         },
     owner: { 
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, "Please provide User id"],
         ref: 'User' 
     },
-    freeShipping: {
-        type: Boolean,
-        default: false,
-        },
-    averageRating: {
+    quantity: {
         type: Number,
-        default: 0,
-        },
+        required: true,
+        default: 0
+    }
+  });
+  products.virtual('reviews', {
+    ref: 'Review',
+    localField: '_id',
+    foreignField: 'product',
+    justOne: false,
   });
   
-  const Product = mongoose.model('Product', products);
+  products.pre('remove', async function (next) {
+    await this.model('Review').deleteMany({ product: this._id });
+  });
+
+  const Product = mongoose.model("Products", products);
+
   
   module.exports = Product;

@@ -14,23 +14,16 @@ const {
     uploadImage
 } = require("../controllers/product.controller");
 
-const { getSingleProductReviews } = require("../controllers/reviewContoller");
+// const { getSingleProductReviews } = require("../controllers/reviewContoller");
 
-router.route('/createProduct').post([authJwt.verifyToken, authJwt.isAdmin], createProduct);
+router.route("/createProduct").post([authJwt.verifyToken], createProduct);
+router.route("/getProducts").get(getAllProduct);
+router.route("/:id").get(getSingleProduct).patch(updateProduct).delete(deleteProduct);
 
 router.route("/uploadImage")
-.post([authJwt.verifyToken, authJwt.isAdmin], uploadImage);
+.post([authJwt.verifyToken], uploadImage);
 
-router.route("/:id")
-.get(getSingleProduct)
-.patch([authJwt.verifyToken, authJwt.isAdmin], updateProduct);
+// router.route("/:id/reviews").get(getSingleProductReviews);
 
-router.route("/:id")
-      .get(getAllProduct)
-      .patch([authJwt.verifyToken, authJwt.isAdmin], updateProduct)
-      .delete([authJwt.verifyToken, authJwt.isAdmin], deleteProduct);
-
-
-router.route("/:id/reviews").get(getSingleProductReviews);
 
 module.exports = router;

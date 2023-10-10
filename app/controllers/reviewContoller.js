@@ -1,118 +1,101 @@
 const Review = require("../models/reviews.model");
 const Product = require("../models/product.model");
-const User = require("../models/user.model");
 
-//const { StatusCodes } = require("http-status-codes");
-const  verifySignUp  = require("../middlewares/verifySignUp");
-const { findById } = require("../models/user.model");
-
-const createReview = async (req, res) =>{
-    try{ 
-
-    const user = await User.findOne({ username: req.body.username });
-    const product = await Product.findOne({ name: req.body.name });
-
-    if(!user){
-        res.status(404).json({ message: "User does not exist!"});
-    };
-    if(!product){
-        res.status(404).json({ message: "Product does not exist!"});
-    };
-
+const createReview = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { title, rating } = req.body;
     
-    const review = new Review({
-        rating: req.body.rating,
-        title: req.body.title,
-        comment: req.body.comment,
-        user: user.id,
-        product: product.id
-    });
+        const product = await Product.findById(productId);
+        if (!product) {
+          return res.status(404).json({ error: 'Product not found' });
+        }
     
-    try{ 
-    const isSubmitted = await review.save();
-    res.status(200).json({ review });
-
-    if(isSubmitted){
-        res.json({ message: "Already submitted review!" });
-    }
-
-    }catch(err){
-    res.status(404).json({ message: "Error occured while trying to save Review!"});
-    }
-
-    console.log(`Review successfully created!`); 
-    }catch(error){
-        res.status(404).json({ message: `Error occured while trying to create product!`, error });
-    }
-};
-
-const getAllReviews = async (req, res) => {
-    const reviews = await Review.find({}).populate({
-        path: "product",
-        select: "name description price",
-    });
-
-    res.status(200).json({ reviews, count: reviews.length });
-};
-
-const getSingleReview = async (req, res) =>{
-    const { id: reviewId } = req.params;
-    const { rating, title, comment } = req.body;
-
-    const review = await Review.findOne({ _id: reviewId });
-
-    if(!review) return res.status(404).send("No review with that ID");
-
-   // verifySignup(req.user, review.user);
-
-    review.rating = rating;
-    review.title = title;
-    review.comment = comment;
-
-    await review.save();
-    res.status(200).json({ review });
-};
-
-const updateReview = async (req, res) =>{
-    const { id: reviewId } = req.params;
-    const { rating, title, comment } = req.body;
+        const review = new Review({
+          productId,
+          title,
+          rating,
+        });
     
-    const review = await Review.findOne({ _id: reviewId });
-
-    if(!review) return res.status(404).send("Error! Review does not exixts");
-
-    //verifySignUp.loginAuth(req.user, review.user);
-
-    review.rating = rating;
-    review.title = title;
-    review.comment = comment;
-
-    await review.save();
-    res.status(200).json({ review });
-}
-
-const deleteReview = async (req, res) =>{
-    const { id: reviewId } = req.params;
-
-    const review = await Review.findOne({ _id: reviewId });
-
-    if(!review) return res.status(404).send("No review with this ID");
-
-   // verifySignUp.loginAuth(req.user, review.user);
-    await review.remove();
-    res.status(200).json({ msg: "Success! Review removed!" });
+        const savedReview = await review.save();
+    
+        // product.reviews.push(savedReview._id);
+        // await product.save();
+    
+        res.json(savedReview);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
 };
 
-const getSingleProductReviews = async (req, res) =>{
-    const { id: productId } = req.params;
-    const review = await Review.findOne({ product: productId });
-    res.status(200).json({ review, count: review.length });
+//Get all reviews for single product!
+const getSingleReview = async (req, res) => {
+    const { productId } = req.params;
+    Review.findOne({ productId }).then((review) => res.status(200).json({ review }))
+    .catch((error) => {
+        res.status(404).json({ message: error})
+    })
 };
+
+// GET a specific review for a product
+const getSpecificReview = async (req, res) => {
+    const { reviewId } = req.params;
+  
+    // Retrieve the specific review based on the reviewId
+    Review.findById(reviewId)
+      .then((review) => {
+        if (!review) {
+          return res.status(404).json({ error: 'Review not found' });
+        }
+        res.json(review);
+      })
+      .catch((err) => res.status(500).json({ error: err.message }));
+  };
+
+  const updateReview = async (req, res) =>{
+        const { reviewId } = req.params;
+        const { rating } = req.body;
+      
+        // Find the review by ID and update its properties
+        Review.findByIdAndUpdate(
+          reviewId,
+          { rating },
+          { new: true }
+        )
+          .then((updatedReview) => {
+            if (!updatedReview) {
+              return res.status(404).json({ error: 'Review not found' });
+            }
+            res.json(updatedReview);
+          })
+          .catch((err) => res.status(500).json({ error: err.message }));
+  };
+
+// DELETE a review for a product
+const deleteReview = async (req, res) => {
+    const { reviewId } = req.params;
+  
+    // Find the review by ID and remove it
+    Review.findByIdAndDelete(reviewId)
+      .then((deletedReview) => {
+        if (!deletedReview) {
+          return res.status(404).json({ error: 'Review not found' });
+        }
+        res.json({ message: 'Review deleted successfully' });
+      })
+      .catch((err) => res.status(500).json({ error: err.message }));
+  };
+
+// const getSingleProductReviews = async (req, res) =>{
+//     const { id: productId } = req.params;
+//     const review = await Review.findOne({ product: productId });
+//     res.status(200).json({ review, count: review.length });
+// };
 
 module.exports = {
     createReview,
-    getAllReviews,
-    getSingleProductReviews,
+    getSpecificReview,
+    // getSingleProductReviews,
     deleteReview,
     getSingleReview,
     updateReview

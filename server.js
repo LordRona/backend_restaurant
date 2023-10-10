@@ -5,19 +5,23 @@ const mongoose = require('mongoose');
 const path = require("path");
 const bodyParser = require("body-parser");
 mongoose.set('strictQuery', false);
-const User = require("./app/models/user.model")
 
 //routers
 const productRoute = require("./app/routes/product.routes");
 const reviewRoute = require("./app/routes/review.route");
+const userRoute = require("./app/routes/user.routes");
+const cartRoute = require("./app/routes/cart.route");
+const orderRoute  = require("./app/routes/orderRoute");
 
 const app = express();
 
-var corsOptions = {
-  origin: "http://localhost:8081"
-};
-
-app.use(cors(corsOptions));
+// var whiteListedDomains = ["http://localhost:8081", "http://localhost:3000", "http://www.google.com"];
+// app.use(cors({
+//   origin: whiteListedDomains,
+//   credentials: true,
+//   methods: ['GET', 'POST'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
 
 // parse requests of content-type - application/json
 app.use(express.json());
@@ -48,14 +52,17 @@ app.use(express.static("./public"));
 
 app.get("/", (req, res) =>{
   res.sendFile(path.join(__dirname, "app/public/index.html"));
-})
+});
 
 // routes
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 
 app.use("/api/product", productRoute);
-app.use("/api", reviewRoute);
+app.use("/api" ,reviewRoute);
+app.use("/api/user", userRoute);
+app.use("/api/cart", cartRoute);
+app.use("/api/order", orderRoute);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 9000;

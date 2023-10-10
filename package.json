@@ -13,6 +13,7 @@
     "authentication",
     "mongodb"
   ],
+ "proxy": "http://localhost:5000" ,
   "author": "bezkoder",
   "license": "ISC",
   "dependencies": {
@@ -31,4 +32,5 @@
     "nodemon": "^3.0.1",
     "validator": "^13.11.0"
   }
+
 }

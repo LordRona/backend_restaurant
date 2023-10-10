@@ -4,18 +4,20 @@ const { authJwt } = require("../middlewares");
 
 const {
     createReview,
-    getAllReviews,
+    getSpecificReview,
     getSingleReview,
     deleteReview,
     updateReview,
 } = require("../controllers/reviewContoller");
 
-router.route("/createReview").post([authJwt.verifyToken,], createReview)
-.get(getAllReviews);
+router.route("/:productId/reviews").post(createReview)
+                                    .get(getSingleReview);
+router.route('/:productId/reviews/:reviewId').get(getSingleReview)
+                                             .put(updateReview)
+                                             .delete(deleteReview);
 
-router.route("/:id/review").get(getSingleReview)
-                    .patch([authJwt.verifyToken], updateReview)
-                    .delete([authJwt.verifyToken], deleteReview);
-
+// router.route("/:id/review").get(getSingleReview)
+//                     .patch([authJwt.verifyToken], updateReview)
+//                     .delete([authJwt.verifyToken], deleteReview);
 
 module.exports = router;

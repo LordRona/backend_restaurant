@@ -29,7 +29,10 @@ const User = mongoose.model(
       }
    }
     },
-    
+    suspended: {
+      type: Boolean,
+      default: false,
+    },
     location:{
        type: String,
        required: true

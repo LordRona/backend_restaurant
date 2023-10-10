@@ -1,33 +1,27 @@
 const Product  = require("../models/product.model");
 const User = require("../models/user.model");
-const path = require("path");
 
 const createProduct = async (req, res) =>{
-    try{
-    // Get the user from the request.
-     const user = await User.findOne({ username: req.body.username });
-        
-    // Create a new product.
-     const product = new Product({
-    name: req.body.name,
-    description: req.body.description,
-    price: req.body.price,
-    owner: user.id,
-  });
+    try {
+        const user = await User.findOne({ username: req.body.username });
 
-  // Save the product to the database.
-  await product.save();
+        const product = new Product({
+            name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            category: req.body.category,
+            image: req.body.image,
+            quantity: req.body.quantity,
+            user: user.id,
+        });
 
-  // Return the product to the client.
-  res.status(200).json(product);
-  console.log("Product created successfully!");
+        await product.save();
+        res.status(200).json({ message: "Product created successfully!" });
 
-
-    }catch(error){
-        res.status(400).json({ message: "Error occured while trying to create product" });
-        console.log(req.body);
+    } catch (error) {
+        res.status(404).json({ message: "Error occured while creating product!", error });
     }
-};
+}
 
 const getAllProduct = async (req, res) =>{
     const products = await Product.find({});
@@ -36,14 +30,9 @@ const getAllProduct = async (req, res) =>{
 };
 
 const getSingleProduct = async (req, res) =>{
-    const { id: productId } = req.params;
 
-    const product = await Product.findOne({ _id: 
-    productId }).populate("reviews");
-
-    if(!product) throw res.status(419).json({ message: `Product not found!` });
-
-    res.status(200).json({ product });
+const product = await Product.findById(req.params.id);
+      res.status(200).json(product);
 };
 
 const updateProduct = async (req, res) =>{
@@ -54,7 +43,7 @@ const updateProduct = async (req, res) =>{
         runValidators: true,
     });
 
-    if(!product) return res.status(404).send("Product not found to be updated!");
+    if(!product) return res.status(404).send("Product to be updated not found!");
 
     res.status(200).json({ product });
 };
