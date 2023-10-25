@@ -1,17 +1,21 @@
 const config = require("../config/auth.config");
 const db = require("../models");
+const { location } = require('../../cordinates');
 const User = db.user;
 const Role = db.role;
+
+// app.use(express.json());
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
-exports.signup = (req, res) => {
+exports.signup = async (req, res) => {
+  
   const user = new User({
     username: req.body.username,
     phone: req.body.phone,
     password: bcrypt.hashSync(req.body.password, 8),
-    location: req.body.location
+    location: location
   });
 
   user.save((err, user) => {

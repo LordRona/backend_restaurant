@@ -1,6 +1,6 @@
 <!--<form action="/profile" method="post" enctype="multipart/form-data">
     <input type="file" name="avatar">
-</form>-->
+</form>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -153,5 +153,61 @@ footer {
         <p>&copy; 2022 Restaurant Ecommerce. All rights reserved.</p>
     </footer>
     <script src="script.js"></script>
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Product</title>
+</head>
+<body>
+  <h1>Create Product</h1>
+  <form id="productForm">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    
+    <label for="name">Product Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    
+    <label for="price">Price:</label>
+    <input type="number" id="price" name="price" required><br><br>
+    
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" name="quantity" required><br><br>
+    
+    <label for="image">Image:</label>
+    <input type="file" id="image" name="image" required><br><br>
+    
+    <input type="submit" value="Create Product">
+  </form>
+
+  <script>
+    const form = document.getElementById("productForm");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("http://localhost:9000/api/product/createProduct", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          alert("Product created successfully!");
+          form.reset();
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message);
+        }
+      } catch (error) {
+        alert("Error occurred while creating the product: " + error.message);
+      }
+    });
+  </script>
 </body>
 </html>

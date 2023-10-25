@@ -1,111 +1,85 @@
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
 const Product = require("../models/product.model");
-const Cart = require("../models/cart.model");
+// const Cart = require("../models/cart.model");
+const Notification = require("../models/notification.model");
+const { user } = require("../models");
 
-//An async function to create Order
-// const createOrder = async (req, res) =>{
-//     const product = await Product.findOne({ name: req.body.name });
-//     const user = await User.findOne({ username: req.body.username });
-//     const cart = await Cart.findOne({ product });
-//     try {
-//         if(!user && !product && !cart){
-//             res.status(404).json({ message: "User or product or cart not found!" });
-//         }else{
-//             const order = new Order({
-//                 owner: user.id,
-//                 product: product.id,
-//                 name: req.body.name,
-//                 quantity: req.body.quantity,
-//                 adress: req.body.adress,
-//                 bill: req.body.quantity * product.price,
-//                 status: "pending"
-//             });
-//         }
-//             const price = product.price;
-//             const name = product.name;
-//             const quantity = req.body.quantity;
+const createOrder = async (req, res) => {
+    // try {
+      const { quantity, productName, totalBill, createdBy, orderedBy, status } = req.body;
+      const user = await User.findOne({ username: req.body.username });
 
-//             res.status(200).json({ order });
-//             console.log(`Order created!, price: ${price}, name: ${name}, quantity: ${quantity}`);
-//     } catch (error) {
-//         res.status(404).json({ message: "Error occured while trying to create order!" });
-//     }  
-//     };
+      const newOrder = new Order({
+        quantity,
+        productName,
+        totalBill,
+        createdBy,
+        orderedBy,
+        status
+      })
+  
+      // Query the database to find the products
+      const products = await Product.find({ _id: { $in: createdBy } });
+  
+      // Save the order to the database
+      await newOrder.save();
+      res.status(200).json({ message: "Order Placed successfully!" });
 
-    //Get all orders
+      //Notification by NodeJS
+      const message = `Your food ${productName}, is being ordered!`;
+      await User.updateMany({ _id: { $in: createdBy } }, { $push: { notifications: message }});  
+      // // Notify the user who created the product
+      // const productCreators = products.map(product => product.owner);
+  
+      // // Assuming you have a User model
+      // const creators = await User.find({ _id: { $in: productCreators } });
+  
+      // // Send a notification or perform any action to notify the creators
+      // creators.forEach(creator => {
+      //   // Send a notification to the creator
+      //   // const notification = new Notification({
+      //   //     recipient: creator._id,
+      //   //     message: `Your product has been ordered by user ${userId}.`
+      //   //   });
+        
+      //   //   // Save the notification to the database
+      //   //   notification.save();
+        
+      //   //   // Emit a WebSocket event to the creator
+      //   //   io.to(creator._id).emit('new-notification', notification);
+      //   // io.emit('new-order', order);
+      //   // // For example, you can use a messaging service or send an email
+      //   // console.log(`Notifying user ${creator.name} that their product has been ordered.`);
 
-const createOrder = async (req, res) =>{
-    const { items: cartItems, tax, shippingFee } = req.body;
+      //   const message = {
+      //     notification: {
+      //       title: "Order placed",
+      //       body: `Your product ${products._id} has been ordered.`
+      //     },
+      //     token: tokenAddress,
+      //   }
 
-    if(!cartItems || cartItems.length < 1 ){
-        return res.status(404).json({ message: "No cart items provided!" });
+      //   admin.messaging().send(message);
+      // });
+  
+      res.json(newOrder);
+    // } catch (error) {
+    //   res.status(500).json({ error: error.message });
+    // }
+  };
+
+  const getOrderUser = async (req, res) =>{
+    try{
+      const userId = req.params.userId;
+      
+      const order = await Order.find({ owner: userId });
+
+      res.status(202).json({ order });
+    }catch(error){
+      res.status(404).json({ message: "Error occured while getting Order" });
     }
-    if(!tax || !shippingFee ){
-        return res.status(404).json({ message: "Please provide taxt and shipping fee" });
-    };
-    
-    let orderItems = [];
-    let subTotal = 0;
-    
-    for(const item of cartItems){
-        const dbProduct = await Product.findOne({ _id: item.product });
-        if(!dbProduct) {
-            res.status(404).json({ message: `No product with id: ${item.product}` });
-        }
-        const { name, price, image, _id } = dbProduct;
-        const singleOrderItem = {
-            amount: item.amount,
-            name,
-            price,
-            image,
-            product: _id,
-        };
-        // add item to order
-        orderItems = [...orderItems, singleOrderItem];
-        // calculate subtotal
-        subTotal += item.amount * price;
-    };
-    
-    // calculate total
-    const total = tax + shippingFee + subTotal;
-
-    
-  const order = await Order.create({
-    orderItems,
-    total,
-    subTotal,
-    tax,
-    shippingFee,
-    // clientSecret: paymentIntent.client_secret,
-    user: req.user.userId,
-  });
-
-  res.status(404).json({ order });
-};
-
-
-const getAllOrders = async (req, res) =>{
-    try {
-        const orders = await Order.find({});
-        res.status(200).json({ orders });
-    } catch (error) {
-        res.status(404).json({ message: "Error occured while trying to get orders!" });
-    };
-};
-
-//get single order
-
-const getSingleOrder = async (req, res) =>{
-    try {
-        const order = await Order.findById(req.params.id);
-        res.status(200).json({ order });
-    } catch (error) {
-        res.status(404).json({ message: "Error occured while trying to get order!" });
-    };
-}
-
-//code to delete order
+  }
 
 const deleteOrder = async (req, res) =>{
     try {
@@ -122,32 +96,11 @@ const deleteOrder = async (req, res) =>{
     };
 };
 
-//code to update order
-
-const updateOrder = async (req, res) =>{
-    try {
-        const order = await Order.findOneAndUpdate({ _id: req.params.id }, req.body, {
-            new: true,
-            runValidators: true,
-        });
-
-        if(!order){
-            res.status(400).json({ message: "Error occured while trying to update order!" });
-        }
-
-        order.update();
-        res.status(200).json({ order });
-
-    } catch (error) {
-        res.status(404).json({ message: "Error occured while trying to update order!" });
-    };
-};
 
 
 module.exports = {
-    getAllOrders,
-    getSingleOrder,
+    getOrderUser,
+    // getSingleOrder,
     createOrder,
-    updateOrder,
     deleteOrder
 }

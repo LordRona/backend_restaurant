@@ -7,23 +7,23 @@ const products = new mongoose.Schema({
         required: [true, "Please provide product name"],
         maxlength: [100, "Name can not be more than 100 characters"]
     },
-    description: { 
-        type: String,
-        required: [true, "Please provide product description"],
-        maxlength: [1000, "Decription can not exceed 1000 characters"],
-    },
+    // description: { 
+    //     type: String,
+    //     required: [true, "Please provide product description"],
+    //     maxlength: [1000, "Decription can not exceed 1000 characters"],
+    // },
     price: { 
         type: Number,
         required: [true, "Please provide price"],
         default: 0,
     },
-    category: {
-        type: String,
-        ref: "Category",
-        required: [true, "Please provide category field"],
-        enum: ["all", "fruits", "african", "foriegn"],
-        default: "all"
-    },
+    // category: {
+    //     type: String,
+    //     ref: "Category",
+    //     required: [true, "Please provide category field"],
+    //     enum: ["all", "fruits", "african", "foriegn"],
+    //     default: "all"
+    // },
     image: {
         type: String,
         default: "/uploads/example.jpeg",
@@ -38,7 +38,7 @@ const products = new mongoose.Schema({
         required: true,
         default: 0
     }
-  });
+  }, { timestamps: true });
   products.virtual('reviews', {
     ref: 'Review',
     localField: '_id',

@@ -1,59 +1,43 @@
 const mongoose = require("mongoose");
 
-const SingleOrderItemSchema = mongoose.Schema({
-    name: { type: String, required: true },
-  image: { type: String, required: true },
-  price: { type: Number, required: true },
-  amount: { type: Number, required: true },
-  product: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Products',
-    required: true,
-  },
-});
-
 const orderSchema = new mongoose.Schema({
-    owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "User"
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Products",
     },
-    tax: {
-        type: Number,
-        required: true,
-      },
-      shippingFee: {
-        type: Number,
-        required: true,
-      },
-      subtotal: {
-        type: Number,
-        required: true,
-      },
-    adress: {
-        type: String,
-        required: true,
-        trim: true,
+    totalBill: {
+      type: Number,
+      required: true,
     },
     quantity: {
-        type: Number,
-        required: true,
-        min: 1,
-        default: 1
+      type: Number,
     },
-    total: {
-        type: Number,
+    
+    productName: String,
+
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
         required: true,
-      },
-    orderItems: [SingleOrderItemSchema],
+    },
+    orderedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
     status:{
         type: String,
         enum: ["pending", "failed", "delivered", "paid", "canceled"],
         default: "pending",
-    }
-
+    },
+    // tokenAddress: {
+    //   type: String,
+    // }
 },
-{ timestamp: true, }
+{ timestamp: {
+  type: Date,
+  default: Date.now,
+}, }
 );
 
 module.exports = mongoose.model("Order", orderSchema);

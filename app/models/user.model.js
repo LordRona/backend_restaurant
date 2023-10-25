@@ -33,9 +33,10 @@ const User = mongoose.model(
       type: Boolean,
       default: false,
     },
+
     location:{
-       type: String,
-       required: true
+      type: String,
+      required: [true, "Please provide your location!"]
     },
     
     tokens: [{
