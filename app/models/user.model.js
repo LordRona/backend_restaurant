@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const objectId = mongoose.Schema.Types.objectId;
+const objectId = mongoose.Schema.Types.ObjectId;
 
 const User = mongoose.model(
   "User",
@@ -54,5 +54,18 @@ const User = mongoose.model(
     ]
   })
 );
+
+
+const userLocation = mongoose.model ("Location", new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  },
+  latitude: String,
+  longitude: String,
+})
+);
+
+module.exports = userLocation;
 
 module.exports = User;

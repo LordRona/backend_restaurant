@@ -1,6 +1,7 @@
 const Product  = require("../models/product.model");
 const User = require("../models/user.model");
 
+
 const createProduct = async (req, res) =>{
     try {
         const user = await User.findOne({ username: req.body.username });
@@ -115,6 +116,19 @@ const deleteProduct = async (req, res) =>{
     res.status(200).json({ msg: "Product successfully deleted!" });
 };
 
+const searchProduct = async (req, res) => {
+    const searchTerm = req.query.q; // Get the search query parameter from the request
+  
+    try {
+      const results = await Product.find({ name: { $regex: searchTerm, $options: 'i' } });
+  
+      res.json(results);
+    } catch (error) {
+      console.error('Error performing search:', error);
+      res.status(500).json({ error: 'An error occurred during the search' });
+    }
+  };
+
 const uploadImage = async (req, res) =>{
     if(!req.file) return res.status(419).json({ message: `No file uploaded!` });
 
@@ -141,5 +155,6 @@ module.exports = {
     deleteProduct,
     uploadImage,
     getALLProductsBySingleUser,
-    getDashboard
+    getDashboard,
+    searchProduct,
 }

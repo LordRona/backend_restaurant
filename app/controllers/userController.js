@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const userLocation = require("../models/user.model");
 const { VerifyToken } = require("../middlewares/authJwt");
 
 const Signin = require("../controllers/auth.controller");
@@ -56,6 +57,44 @@ const suspendAccount = async (req, res) =>{
         }).catch (error => { res.status(404).json({ message: "Error occured while trying to Suspend User!"})
     });
 };
+
+const createUserLocation = async (req, res) =>{
+    try{
+        const { userId, latitude, longitude } = req.body;
+
+        //Creating the location and stored in the database!
+        const location = new userLocation({
+            userId,
+            latitude,
+            longitude
+        });
+
+        await location.save();
+
+        res.status(200).json({message: "Sent successfully!" });
+    }catch(error){
+        res.status(404).json({ message: "Error occured while creating location!" });
+    }
+};
+
+// const getUserLocation = async (req, res) =>{
+//     try{
+//         const { userId } = req.params;
+
+//         const userLocation = await User.findOne({ userId });
+
+//         if(!userLocation){
+//             res.status(404).json({ message: "User not found!" });
+//         };
+
+//          // Use the Google Maps API to place a pin on the map at the customer's location.
+//         const googleMapsServices = new GoogleMapsServices({
+//           key: 'YOUR_GOOGLE_MAPS_API_KEY',
+//         });
+//     }catch(error){
+//         res.status(404).json({ message: "Error occured while getting user location!" });
+//     }
+// }
 
 
 module.exports = {

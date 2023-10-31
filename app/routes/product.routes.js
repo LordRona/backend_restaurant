@@ -14,12 +14,14 @@ const {
     updateProduct,
     deleteProduct,
     getALLProductsBySingleUser,
-    getDashboard
+    getDashboard,
+    searchProduct,
 } = require("../controllers/product.controller");
 
 router.route("/createProduct").post( createProduct);
 router.route("/getall").get(getAllProduct);
 router.route("/getDashboard").get(getDashboard);
+router.route("/search").get(searchProduct);
 router.route("/getAllProductsBySingleUser/:userId").get(getALLProductsBySingleUser);
 router.route("/:id").get(getSingleProduct).patch(updateProduct).delete(deleteProduct);
 

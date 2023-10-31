@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = mongoose.model("Order", new mongoose.Schema({
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Products",
@@ -12,7 +12,10 @@ const orderSchema = new mongoose.Schema({
     quantity: {
       type: Number,
     },
-    
+    price: {
+      type: Number,
+      required: [true, "Please provide price!"]
+    },
     productName: String,
 
     createdBy: {
@@ -30,14 +33,12 @@ const orderSchema = new mongoose.Schema({
         enum: ["pending", "failed", "delivered", "paid", "canceled"],
         default: "pending",
     },
-    // tokenAddress: {
-    //   type: String,
-    // }
+  
 },
 { timestamp: {
   type: Date,
   default: Date.now,
 }, }
-);
+));
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports =  orderSchema 

@@ -42,7 +42,15 @@ loginAuth = async(req, res, next) => {
   try {
     //const token = req.headers('Authorization').replace('Bearer ', '')
     const decoded = jwt.verify(token, config.secret)
-    const user = await User.findOne({ _id: decoded._id, 'tokens.token':token })
+    const user = await User.findOne({ _id: decoded._id, 'tokens.token':token });
+
+    const isTokenExpired = Date.now() >= decoded.exp * 1000
+    if(isTokenExpired){
+      user.tokens = [];
+      await user.save();
+
+      res.status(301).json({ message: "Token expired! Please login again" } );
+    }
 
     req.user.tokens =  req.user.tokens.filter((token) => {
       return token.token !== req.token

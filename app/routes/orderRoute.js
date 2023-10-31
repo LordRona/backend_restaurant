@@ -3,7 +3,7 @@ const router = express.Router();
 
 const {
     getOrderUser,
-    // getSingleOrder,
+    getOrderRestaurant,
     //getCurrentUserOrders,
     createOrder,
     // updateOrder
@@ -12,7 +12,8 @@ const {
 router
       .route("/createOrder")
       .post(createOrder);
-router.route("/getOrder/:userId").get(getOrderUser);
+router.route("/getOrderUser/:orderedBy").get(getOrderUser);
+router.route("/getOrderRestaurant/:restaurantId").get(getOrderRestaurant);
 
 
 module.exports = router;

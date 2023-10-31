@@ -8,7 +8,9 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 mongoose.set('strictQuery', false);
 const Product = require("./app/models/product.model");
-const multerS3 = require('multer-s3');
+const { Server } = require('socket.io');
+const httpServer = require('http').createServer();
+const io = new Server(httpServer);
 const AWS = require('aws-sdk');
 const sharp = require("sharp");
 
@@ -23,6 +25,8 @@ const app = express();
 
 
 app.use(express.json());
+// Map to store restaurant WebSocket connections
+const restaurantConnections = new Map();
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -53,13 +57,6 @@ admin.initializeApp({
 });
 
 //AWS
-
-// AWS.config.update({
-//   accessKeyId: 'AKIAWY2J6GUJ3JD5W44Qv',
-//   secretAccessKey: '/57qUnsmdl0cxI0XUvqFEWRJwMie6pPYEylNwTd1',
-//   region: 'us-west-2',
-// });
-
 // Configure multer for handling file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -133,18 +130,18 @@ app.get("/", (req, res) =>{
   res.sendFile(path.join(__dirname, "app/public/index.html"));
 });
 
-app.get('/search', async (req, res) => {
-  const searchTerm = req.query.q; // Get the search query parameter from the request
+// app.get('/search', async (req, res) => {
+//   const searchTerm = req.query.q; // Get the search query parameter from the request
 
-  try {
-    const results = await Product.find({ name: { $regex: searchTerm, $options: 'i' } });
+//   try {
+//     const results = await Product.find({ name: { $regex: searchTerm, $options: 'i' } });
 
-    res.json(results);
-  } catch (error) {
-    console.error('Error performing search:', error);
-    res.status(500).json({ error: 'An error occurred during the search' });
-  }
-});
+//     res.json(results);
+//   } catch (error) {
+//     console.error('Error performing search:', error);
+//     res.status(500).json({ error: 'An error occurred during the search' });
+//   }
+// });
 
 // routes
 require("./app/routes/auth.routes")(app);
@@ -155,6 +152,24 @@ app.use("/api" ,reviewRoute);
 app.use("/api/user", userRoute);
 // app.use("/api/cart", cartRoute);
 app.use("/api/order", orderRoute);
+
+
+// Listen for incoming socket connections
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  // Store the WebSocket connection in the map
+  restaurantConnections.set(restaurantId, socket);
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+    restaurantConnections.delete(restaurantId);
+  });
+});
+
+// Export the Socket.IO server instance and the restaurantConnections map
+module.exports = { io, restaurantConnections };
 
 // set port, listen for requests
 const PORT = process.env.PORT || 9000;
