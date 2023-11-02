@@ -1,48 +1,60 @@
 const Product  = require("../models/product.model");
 const User = require("../models/user.model");
+const multer = require("multer");
+const AWS = require('aws-sdk');
+const sharp = require("sharp");
+
+// Configure multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+AWS.config.update({
+    accessKeyId: process.env.ACCESS_KEY,
+    secretAccessKey: process.env.SECRETE_ACCESS,
+    region: process.env.REGION,
+  });
+  const s3 = new AWS.S3();
 
 
-const createProduct = async (req, res) =>{
-    try {
-        const user = await User.findOne({ username: req.body.username });
-        if(!req.file) {
-            return res.status(419).json({ message: `No file uploaded!` });
-        };
-
-        const image = req.file.image;
-
-       if(!image.mimetype.startsWith("image")){ 
-         return res.status(419).json({ message: `File type has to be image!` });
-        };
-
-       if(image.size > maxSize) {
-        return res.status(419).json({ message: `Please upload image less than 1MB` });
-       };
-
-       const imagePath = path.join(__dirname, '../public/uploads/' + `${image.name}`);
-
-       
-       await image.mv(imagePath);
-
-       res.status(200).json({ image: `/uploads/${image.name}` });
-
-        const product = new Product({
-            name: req.body.name,
-            // description: req.body.description,
-            price: req.body.price,
-            // category: req.body.category,
-            image: image.name,
-            quantity: req.body.quantity,
-            user: user.id,
-        });
-
-        await product.save();
-        res.status(200).json({ message: "Product created successfully!" });
-
-    } catch (error) {
-        res.status(404).json({ message: "Error occured while creating product!" });
-    }
-}
+const createProduct = async(req, res) => {
+    try{ 
+    const imageFile = req.file;
+  
+  
+    const compressedImageBuffer = await sharp(imageFile.buffer)
+    .toFormat("jpeg").jpeg({ quality: 70}).toBuffer();
+  
+     // Upload the compressed image file to S3 bucket
+     const uploadParams = {
+      Bucket: 'newalzironbucket',
+      Key: `${Date.now()}-${imageFile.originalname}`,
+      Body: compressedImageBuffer,
+      ACL: 'public-read',
+      ContentType: imageFile.mimetype
+    };
+  
+    const uploadResult = await s3.upload(uploadParams).promise();
+  
+      // Get the S3 image URL
+      const imageUrl = uploadResult.Location;
+    //.replace(/\s/g, '');
+    const newProduct = new Product({
+      name: req.body.name,
+      price: req.body.price,
+      quantity: req.body.quantity,
+      image: imageUrl
+    });
+  
+    const savedProducts = await newProduct.save();
+    console.log("Product created successfully!", savedProducts, imageFile);
+    res.status(200).json({message: "Product created successfully!" });
+    res.json({ imageUrl: req.file.location });
+  
+  }catch(error){
+    res.status(404).json({ message: `Error occured while creating product!` });
+    console.log(error);
+  }
+  };  
 
 const getAllProduct = async (req, res) =>{
     const products = await Product.find({});
@@ -105,7 +117,7 @@ const deleteProduct = async (req, res) =>{
         Key: key
     }
 
-    S3.deleteObject(params).promise();
+    s3.deleteObject(params).promise();
     console.log("Picture deleted successfully!", key);
 
     const product = await Product.findOneAndDelete({ _id: productId });
@@ -129,23 +141,6 @@ const searchProduct = async (req, res) => {
     }
   };
 
-const uploadImage = async (req, res) =>{
-    if(!req.file) return res.status(419).json({ message: `No file uploaded!` });
-
-    const productImage = req.files.image;
-
-    if(!productImage.mimetype.startsWith("image")) return res.status(419).json({ message: `File type has to be image!` });
-
-    const maxSize = 1024 * 1024;
-
-    if(productImage.size > maxSize) return res.status(419).json({ message: `Please upload image less than 1MB` });
-
-    const imagePath = path.join(__dirname, '../public/uploads/' + `${productImage.name}`);
-
-    await productImage.mv(imagePath);
-
-    res.status(200).json({ image: `/uploads/${productImage.name}` });
-};
 
 module.exports = {
     createProduct,
@@ -153,8 +148,9 @@ module.exports = {
     getSingleProduct,
     updateProduct,
     deleteProduct,
-    uploadImage,
     getALLProductsBySingleUser,
     getDashboard,
     searchProduct,
+    upload,
 }
+

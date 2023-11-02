@@ -12,7 +12,7 @@ verifyToken = (req, res, next) => {
   }
 
   jwt.verify(token,
-            config.secret,
+    process.env.JWT_SECRETE_KEY,
             (err, decoded) => {
               if (err) {
                 return res.status(401).send({

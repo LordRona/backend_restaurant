@@ -33,6 +33,10 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
         enum: ["pending", "failed", "delivered", "paid", "canceled"],
         default: "pending",
     },
+    token: {
+      type: String,
+      required: [true, "Please provide token"],
+    }
   
 },
 { timestamp: {

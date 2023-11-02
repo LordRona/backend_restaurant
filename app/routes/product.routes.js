@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+// const upload = require("../controllers/product.controller");
 
 const verifySignup = require("../middlewares/verifySignUp");
 const authJwt = require("../middlewares/authJwt");
@@ -16,9 +17,10 @@ const {
     getALLProductsBySingleUser,
     getDashboard,
     searchProduct,
+    upload,
 } = require("../controllers/product.controller");
 
-router.route("/createProduct").post( createProduct);
+router.route("/createProduct").post(upload.single('image'),createProduct);
 router.route("/getall").get(getAllProduct);
 router.route("/getDashboard").get(getDashboard);
 router.route("/search").get(searchProduct);

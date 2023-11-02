@@ -8,25 +8,20 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 mongoose.set('strictQuery', false);
 const Product = require("./app/models/product.model");
-const { Server } = require('socket.io');
-const httpServer = require('http').createServer();
-const io = new Server(httpServer);
 const AWS = require('aws-sdk');
 const sharp = require("sharp");
+require('dotenv').config();
 
 //routers
 const productRoute = require("./app/routes/product.routes");
 const reviewRoute = require("./app/routes/review.route");
 const userRoute = require("./app/routes/user.routes");
-// const cartRoute = require("./app/routes/cart.route");
 const orderRoute  = require("./app/routes/orderRoute");
 
 const app = express();
 
 
 app.use(express.json());
-// Map to store restaurant WebSocket connections
-const restaurantConnections = new Map();
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -36,7 +31,7 @@ const db = require("./app/models");
 const Role = db.role;
 
 db.mongoose
-  .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
@@ -68,21 +63,6 @@ AWS.config.update({
 });
 const s3 = new AWS.S3();
 
-
-// Create multer upload instance
-// const upload = multer({ storage: multerS3({
-//   s3: s3,
-//   bucket: 'newalzironbucket',
-//   acl: 'public-read',
-//   key: function (req, file, cb) {
-//     cb(null, Date.now().toString() + '-' + file.originalname)
-//   },
-//   contentType: (req, file, cb) => {
-//     cb(null, file.mimetype); // Set the content type based on the uploaded file's mimetype
-//   },
-// }) });
-
-// Serve static files from the 'uploads' directory
 app.use(express.static('./uploads'));
 
 // Handle image upload
@@ -150,26 +130,8 @@ require("./app/routes/user.routes")(app);
 app.use("/api/product", productRoute);
 app.use("/api" ,reviewRoute);
 app.use("/api/user", userRoute);
-// app.use("/api/cart", cartRoute);
 app.use("/api/order", orderRoute);
 
-
-// Listen for incoming socket connections
-io.on('connection', (socket) => {
-  console.log('New client connected');
-
-  // Store the WebSocket connection in the map
-  restaurantConnections.set(restaurantId, socket);
-
-  // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-    restaurantConnections.delete(restaurantId);
-  });
-});
-
-// Export the Socket.IO server instance and the restaurantConnections map
-module.exports = { io, restaurantConnections };
 
 // set port, listen for requests
 const PORT = process.env.PORT || 9000;

@@ -1,43 +1,54 @@
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
 const Product = require("../models/product.model");
-// const Cart = require("../models/cart.model");
-const { restaurantConnections } = require("../../server");
-const { user } = require("../models");
-
+const firebase = require('firebase-admin');
 const createOrder = async (req, res) => {
+  const serviceAccount = require('../../alien-aileron-390207-firebase-adminsdk-vk283-b0523d8a44.json');
     try {
-      // const { quantity, productName, totalBill, createdBy, orderedBy, status } = req.body;
-      // const user = await User.findOne({ username: req.body.username });
-
-      // const newOrder = new Order({
-      //   quantity,
-      //   productName,
-      //   totalBill,
-      //   createdBy,
-      //   orderedBy,
-      //   status
-      // })
-
+     
       const newOrder = req.body;
+      const registrationToken = req.body.token;
 
       let products = await Order.create(newOrder);
       console.log(products);
       // Query the database to find the products
     
-      newOrder.forEach(order => {
-        const { createdBy, productName, quantity, orderedBy } = order;
-      const restaurantSocket = restaurantConnections.get(createdBy);
-      if (restaurantSocket) {
-        const orderData = {
-          productName,
-          quantity,
-          orderedBy
-        }
-        restaurantSocket.emit('Your product has been Ordered!', orderData);
-      }
+      // newOrder.forEach(order => {
+      //   const { createdBy, productName, quantity, orderedBy } = order;
+      // const restaurantSocket = restaurantConnections.get(createdBy);
+      // if (restaurantSocket) {
+      //   const orderData = {
+      //     productName,
+      //     quantity,
+      //     orderedBy
+      //   }
+      //   restaurantSocket.emit('Your product has been Ordered!', orderData);
+      // }
   
+      // });
+
+      firebase.initializeApp({
+        credential: firebase.credential.cert(serviceAccount),
       });
+      
+      // const messaging = firebase.messaging();
+
+      const message = {
+        token: registrationToken,
+        notification: {
+          title: 'My Push Notification',
+          body: 'This is the body of my push notification.',
+        },
+      };
+      
+      admin.messaging().send(message)
+        .then((response) => {
+          console.log('Push notification sent successfully:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending push notification:', error);
+        });
+
 
       res.status(200).json({ message: "Order Placed successfully!" });
   
