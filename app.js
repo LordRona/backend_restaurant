@@ -106,7 +106,7 @@ app.post('/api/product/image', upload.single('image'), async(req, res) => {
 }
 });
 
-app.get("/", (req, res) =>{
+app.get("/start", (req, res) =>{
   res.send("Welcome to alziron systems app!")
 });
 
