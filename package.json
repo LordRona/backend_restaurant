@@ -2,9 +2,9 @@
   "name": "node-js-jwt-auth-mongodb",
   "version": "1.0.0",
   "description": "Node.js + MongoDB: JWT Authentication & Authorization",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": ""
   },
   "keywords": [
     "node.js",
