@@ -1,28 +1,43 @@
+const User = require("../models/user.model");
 const Review = require("../models/reviews.model");
 const Product = require("../models/product.model");
 
 const createReview = async (req, res) => {
     try {
-        const { productId } = req.params;
-        const { title, rating } = req.body;
-    
-        const product = await Product.findById(productId);
-        if (!product) {
-          return res.status(404).json({ error: 'Product not found' });
-        }
+        const username = await User.findOne({ username: req.body.username });
+        const userId = username.id;
+        const productId = req.body.productId
+        // if (!product) {
+        //   return res.status(404).json({ error: 'Product not found' });
+        // }
     
         const review = new Review({
+          userId,
           productId,
-          title,
-          rating,
+          rating: req.body.rating,
         });
     
         const savedReview = await review.save();
-    
-        // product.reviews.push(savedReview._id);
-        // await product.save();
-    
-        res.json(savedReview);
+        res.status(200).json({ savedReview });
+
+        
+        
+        // Review.find({}, "rating", (err, products) =>{
+        //   if(err){
+        //     console.log("error occured!",err);
+        //     return
+        //   }
+
+        //   // Calculate the total price by summing the `price` values
+        // const totalPrice = products.reduce((sum, product) => sum + product.rating, 0);
+      
+        // // Calculate the average price
+        // const averagePrice = totalPrice / products.length;
+      
+        // console.log('Total price:', totalPrice);
+        // console.log('Average price:', averagePrice);
+        // });
+
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
@@ -36,6 +51,26 @@ const getSingleReview = async (req, res) => {
         res.status(404).json({ message: error})
     })
 };
+
+const getAverageReview = async (req, res) => {
+  try{
+    const productId = req.body.productId
+    const username = await User.findOne({ username: req.body.username });
+    const userId = username.id;
+
+     const ratings = await Review.find({ userId });
+     const ratingValues = ratings.map(rating => rating.rating);
+
+     const sum = ratingValues.reduce((acc, rating) => acc + rating, 0);
+
+     // Calculate the average
+     const average = sum / ratingValues.length;
+
+        res.status(200).json({ average });
+  }catch(error){
+    res.status(404).json({ msg: "Error occured while getting average review!" });
+  }
+}
 
 // GET a specific review for a product
 const getSpecificReview = async (req, res) => {
@@ -95,7 +130,7 @@ const deleteReview = async (req, res) => {
 module.exports = {
     createReview,
     getSpecificReview,
-    // getSingleProductReviews,
+    getAverageReview,
     deleteReview,
     getSingleReview,
     updateReview

@@ -8,10 +8,12 @@ const {
     getSingleReview,
     deleteReview,
     updateReview,
+    getAverageReview
 } = require("../controllers/reviewContoller");
 
-router.route("/:productId/reviews").post(createReview)
-                                    .get(getSingleReview);
+router.route("/createReview").post(createReview)
+router.route("/getSingleReview").get(getSingleReview);
+router.route("/get-average-review").get(getAverageReview);
 router.route('/:productId/reviews/:reviewId').get(getSingleReview)
                                              .put(updateReview)
                                              .delete(deleteReview);

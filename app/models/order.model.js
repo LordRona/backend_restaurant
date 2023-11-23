@@ -5,9 +5,9 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Products",
     },
-    totalBill: {
-      type: Number,
-      required: true,
+    uniqueCode: {
+      type: String,
+      required: [true, "Please provide unique code"]
     },
     quantity: {
       type: Number,
@@ -16,12 +16,34 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
       type: Number,
       required: [true, "Please provide price!"]
     },
-    productName: String,
-
+    productName: {
+      type: String,
+      required: true
+    },
+    ownerName: {
+      type: String,
+      required: true
+    },
+    customerName: {
+      type: String,
+      required: true,
+    },
+    ownerLocation: {
+      type: String,
+      required: true
+    },
+    customerLocation: {
+      type: String,
+      required: true
+    },
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
+    },
+    image: {
+      type: String,
+      required: true,
     },
     orderedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -33,15 +55,15 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
         enum: ["pending", "failed", "delivered", "paid", "canceled"],
         default: "pending",
     },
-    token: {
+    token: [{
       type: String,
-      required: [true, "Please provide token"],
-    }
+      required: [true, "Please provide notification token"],
+    }]
   
 },
 { timestamp: {
   type: Date,
-  default: Date.now,
+  default: Date.now(),
 }, }
 ));
 

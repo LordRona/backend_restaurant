@@ -33,6 +33,14 @@ const products = new mongoose.Schema({
         required: [true, "Please provide User id"],
         ref: 'User' 
     },
+    key: {
+        type: String,
+        required: true,
+    },
+    ownerLocation: {
+        type: String,
+        required: true,
+    },
     quantity: {
         type: Number,
         required: true,

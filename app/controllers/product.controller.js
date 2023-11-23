@@ -3,6 +3,7 @@ const User = require("../models/user.model");
 const multer = require("multer");
 const AWS = require('aws-sdk');
 const sharp = require("sharp");
+const { user } = require("../models");
 
 // Configure multer for handling file uploads
 const storage = multer.memoryStorage();
@@ -34,6 +35,8 @@ const createProduct = async(req, res) => {
     };
   
     const uploadResult = await s3.upload(uploadParams).promise();
+
+    const user = await User.findOne({ username: req.body.username });
   
       // Get the S3 image URL
       const imageUrl = uploadResult.Location;
@@ -42,7 +45,11 @@ const createProduct = async(req, res) => {
       name: req.body.name,
       price: req.body.price,
       quantity: req.body.quantity,
-      image: imageUrl
+      image: uploadResult.Location,
+      owner: user.id,
+      ownerName: req.body.username,
+      ownerLocation: user.location,
+      key: uploadResult.Key
     });
   
     const savedProducts = await newProduct.save();

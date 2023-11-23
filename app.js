@@ -6,6 +6,7 @@ const path = require("path");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
+const serviceAccount = require("./e-restou-alziron-firebase-adminsdk-37aq4-883e03d2e8.json");
 mongoose.set('strictQuery', false);
 const Product = require("./app/models/product.model");
 const AWS = require('aws-sdk');
@@ -45,11 +46,18 @@ db.mongoose
   });
 
 
-const serviceAccount = require('./alien-aileron-390207-firebase-adminsdk-vk283-b0523d8a44.json');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`
 });
+
+const message = {
+  Notification: {
+    title: "Test Your luck",
+    body: "Not bad then",
+  },
+  //token: registrationToken
+}
 
 //AWS
 // Configure multer for handling file uploads
@@ -128,7 +136,7 @@ require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 
 app.use("/api/product", productRoute);
-app.use("/api" ,reviewRoute);
+app.use("/api/review" ,reviewRoute);
 app.use("/api/user", userRoute);
 app.use("/api/order", orderRoute);
 
