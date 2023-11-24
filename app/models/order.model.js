@@ -7,7 +7,7 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
     },
     uniqueCode: {
       type: String,
-      required: [true, "Please provide unique code"]
+      required: true
     },
     quantity: {
       type: Number,
@@ -43,7 +43,7 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
     },
     image: {
       type: String,
-      required: true,
+      // required: true,
     },
     orderedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -57,7 +57,7 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
     },
     token: [{
       type: String,
-      required: [true, "Please provide notification token"],
+      // required: [true, "Please provide notification token"],
     }]
   
 },

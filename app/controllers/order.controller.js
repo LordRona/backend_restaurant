@@ -6,65 +6,61 @@ const firebase = require('firebase-admin');
 const { user } = require("../models");
 const { restaurantConnections } = require("../../app");
 
-function generateUniqueCode (){
-  const digits = '0123456789';
-  const codeLength = 6
-  let code = '';
+function generateOTP() {
+  const min = 100000; // Minimum value (inclusive)
+  const max = 999999; // Maximum value (inclusive)
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
-  for(let i = 0; i< codeLength; i++){
-    const randomIndex = Math.floor(Math.random() * digits);
-
-    code += digits[randomIndex];
-  };
-  return code;
-};
+const otp = generateOTP();
 
 
 //Create Order controller
 const createOrder = async (req, res) => {
-  const serviceAccount = require('../../alien-aileron-390207-firebase-adminsdk-vk283-b0523d8a44.json');
+  // const serviceAccount = require('../../e-restou-alziron-firebase-adminsdk-37aq4-883e03d2e8.json');
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+  // admin.initializeApp({
+  //   credential: admin.credential.cert(serviceAccount),
+  // });
     try {
-      const uniqueCode = generateUniqueCode();
+      const uniqueCode = generateOTP();
      
-      const newOrder = req.body.orders;
+      // const newOrder = req.body.orders;
+      const newOrder = {...req.body,uniqueCode:uniqueCode}
+      // console.log(newOrder)
       const registrationToken = req.body.token;
 
-      // let products = await Order.create(newOrder);
-      // console.log(products);
+      let products = await Order.create(newOrder);
 
-      const order = new Order({
-        newOrder,
-        uniqueCode
-      });
+      // const order = new Order({
+      //   newOrder,
+      //   uniqueCode
+      // });
 
-      const savedOrder = await order.save();
-      console.log('Order saved:', savedOrder);
-      res.json(savedOrder);
+      // const savedOrder = await order.save();
+      // console.log('Order saved:', savedOrder);
+      // res.json(savedOrder);
       
       // const messaging = firebase.messaging();
 
-      const message = {
-        token: registrationToken,
-        notification: {
-          title: 'New Order!',
-          body: 'Your order has been created!',
-        },
-      };
+      // const message = {
+      //   token: registrationToken,
+      //   notification: {
+      //     title: 'New Order!',
+      //     body: 'Your order has been created!',
+      //   },
+      // };
       
-      admin.messaging().send(message)
-        .then((response) => {
-          console.log('Push notification sent successfully:', response);
-        })
-        .catch((error) => {
-          console.log('Error sending push notification:', error);
-        });
+      // admin.messaging().send(message)
+      //   .then((response) => {
+      //     console.log('Push notification sent successfully:', response);
+      //   })
+      //   .catch((error) => {
+      //     console.log('Error sending push notification:', error);
+      //   });
 
 
-      res.status(200).json({ message: "Order Placed successfully!" });
+      // res.status(200).json({ message: "Order Placed successfully!" });
   
       res.json(products);
     } catch (error) {
@@ -137,17 +133,22 @@ const tokenRoute = async(req, res) =>{
 
 const validateCode = async(req, res) =>{
   try {
-    const { code, orderedBy } = req.body;
+    const code = req.body.uniqueCode;
+    const orderedBy = req.body.orderedBy;
 
-    const order = Order.findOne({ code });
+    Order.findOne({ uniqueCode: code }, (err, result) =>{
+      if(err) res.status(404).json({ msg: "Error Occured!" });
 
-    if(order && order.orderedBy.toString() === orderedBy){
-      res.status(200).json({ valid: true });
-    }else{
-      res.json({ valid: false });
-    }
+      const orderId = result.orderedBy.toString()
+      if(result.uniqueCode === code.toString() && orderedBy === orderId){
+        res.status(200).json({ msg: "Delivery confirmed!" });
+      }else{
+        res.status(404).json({ msg: "Wrong code inserted" });
+      }
+    });
+  
   } catch (error) {
-    res.status(400).json({ msg: "Error occured1" });
+    res.status(400).json({ msg: "Error occured!" });
   }
 }
 
