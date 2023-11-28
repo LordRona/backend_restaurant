@@ -13,3 +13,7 @@ exports.adminBoard = (req, res) => {
 exports.restaurantBoard = (req, res) => {
   res.status(200).send("Restaurant Content.");
 };
+
+exports.suspendAccount = (req, res) => {
+  res.status(200).send("Suspend Content.");
+}

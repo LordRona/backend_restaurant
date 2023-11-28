@@ -3,7 +3,7 @@ const router = express.Router();
 // const upload = require("../controllers/product.controller");
 
 const verifySignup = require("../middlewares/verifySignUp");
-const authJwt = require("../middlewares/authJwt");
+// const authJwt = require("../middlewares/authJwt");
 const controller = require("../controllers/user.controller");
 
 // const upload = multer({ dest: "upload/"});

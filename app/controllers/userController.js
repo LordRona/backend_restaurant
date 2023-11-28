@@ -1,8 +1,10 @@
 const User = require("../models/user.model");
 const userLocation = require("../models/user.model");
 const { VerifyToken } = require("../middlewares/authJwt");
+const db = require("../models");
+const Role = db.role;
 
-const Signin = require("../controllers/auth.controller");
+const Signin = require("./auth.controller");
 
 const updateUserPassword = async (req, res) =>{
     const { oldPassword, newPassword } = req.body;
@@ -46,55 +48,36 @@ const updateUserNameAndPhone = async (req, res) =>{
 }
 
 const suspendAccount = async (req, res) =>{
+    try {
+        const user = await User.findOne({ username: req.body.username });
+        const userId = user.id;
 
-        const { id } = req.params;
-        User.findByIdAndUpdate(id, { suspended: true }, { new: true }).then((user) => {
-            if(user){
-                res.status(200).json({ user });
-            }else{
-                res.status(400).json({ message: "User not found!" });
-            }
-        }).catch (error => { res.status(404).json({ message: "Error occured while trying to Suspend User!"})
-    });
-};
+        if(!userId) return res.status(404).send("User not found!");
 
-const createUserLocation = async (req, res) =>{
-    try{
-        const { userId, latitude, longitude } = req.body;
-
-        //Creating the location and stored in the database!
-        const location = new userLocation({
-            userId,
-            latitude,
-            longitude
-        });
-
-        await location.save();
-
-        res.status(200).json({message: "Sent successfully!" });
-    }catch(error){
-        res.status(404).json({ message: "Error occured while creating location!" });
+        User.findByIdAndUpdate(userId, {
+            status: "suspended"
+        }, (err, user) => {
+            if(err) return res.status(500).send(err);
+            res.status(200).json({ msg: "User suspended successfully!" });
+        })
+    } catch (error) {
+        res.status(401).json({ msg: "Internal server error!" });
     }
 };
 
-// const getUserLocation = async (req, res) =>{
-//     try{
-//         const { userId } = req.params;
+const searchUser = async (req, res) =>{
+    try {
+        const searchRestaurant = req.query.q;
 
-//         const userLocation = await User.findOne({ userId });
+        const user = await User.find({
+            username: { $regex: searchRestaurant, $options: 'i' }
+        });
 
-//         if(!userLocation){
-//             res.status(404).json({ message: "User not found!" });
-//         };
-
-//          // Use the Google Maps API to place a pin on the map at the customer's location.
-//         const googleMapsServices = new GoogleMapsServices({
-//           key: 'YOUR_GOOGLE_MAPS_API_KEY',
-//         });
-//     }catch(error){
-//         res.status(404).json({ message: "Error occured while getting user location!" });
-//     }
-// }
+        res.status(200).json(user);
+    } catch (error) {
+        req.status(401).json({ msg: "Internal server error!" });
+    }
+}
 
 
 module.exports = {
@@ -102,4 +85,5 @@ module.exports = {
     updateUserNameAndPhone,
     showCurrentUser,
     suspendAccount,
+    searchUser,
 }

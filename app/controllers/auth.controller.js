@@ -15,7 +15,8 @@ exports.signup = async (req, res) => {
     username: req.body.username,
     phone: req.body.phone,
     password: bcrypt.hashSync(req.body.password, 8),
-    location: req.body.location
+    location: req.body.location,
+    hasDelivery: req.body.hasDelivery
   });
 
   user.save((err, user) => {

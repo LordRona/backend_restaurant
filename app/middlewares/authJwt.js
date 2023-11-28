@@ -91,6 +91,6 @@ isAdmin = (req, res, next) => {
 const authJwt = {
   verifyToken,
   isAdmin,
-  isAdmin: isRestaurant
+  isRestaurant
 };
 module.exports = authJwt;

@@ -25,17 +25,11 @@ const createOrder = async (req, res) => {
     try {
       const uniqueCode = generateOTP();
      
-      // const newOrder = req.body.orders;
       const newOrder = {...req.body,uniqueCode:uniqueCode}
-      // console.log(newOrder)
+      
       const registrationToken = req.body.token;
 
       let products = await Order.create(newOrder);
-
-      // const order = new Order({
-      //   newOrder,
-      //   uniqueCode
-      // });
 
       // const savedOrder = await order.save();
       // console.log('Order saved:', savedOrder);

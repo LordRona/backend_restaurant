@@ -27,7 +27,11 @@ const User = mongoose.model(
        if( value.toLowerCase().includes("password")) {
        throw new Error("password musn’t contain 'password'!")
       }
-   }
+   },
+    },
+    hasDelivery: {
+      type: String,
+      required: false
     },
     suspended: {
       type: Boolean,
