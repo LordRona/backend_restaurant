@@ -45,6 +45,10 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
       type: String,
       // required: true,
     },
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+    },
     orderedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -60,11 +64,7 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
       // required: [true, "Please provide notification token"],
     }]
   
-},
-{ timestamp: {
-  type: Date,
-  default: Date.now(),
-}, }
+}
 ));
 
 module.exports =  orderSchema 

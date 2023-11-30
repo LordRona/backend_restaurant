@@ -86,11 +86,20 @@ isAdmin = (req, res, next) => {
   });
 };
 
+checkSuspendedAccount = (req, res, next) => {
+  const { status } = req.body;
+  
+  if (status) {
+    return res.status(403).send({ message: "Account suspended!" });
+  }
 
+  next();
+}
 
 const authJwt = {
   verifyToken,
   isAdmin,
-  isRestaurant
+  isRestaurant,
+  checkSuspendedAccount,
 };
 module.exports = authJwt;

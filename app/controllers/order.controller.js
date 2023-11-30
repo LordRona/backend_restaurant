@@ -92,6 +92,39 @@ const getOrderRestaurant = async (req, res) =>{
   }
 }
 
+const getOrdersOfTheDay = async (req, res) =>{
+  try{
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const order = await Order.find({
+      createdAt: { $gte: today },
+    });
+
+    const totalPricePerUser = order.reduce((acc, order) => {
+      const { createdBy, price } = order;
+      if (!acc[createdBy]) {
+        acc[createdBy] = {
+          order: [order],
+          totalPrice: price,
+        };
+      }else{
+        acc[createdBy].order.push(order);
+        acc[createdBy].totalPrice += price;
+      }
+
+      return acc;
+    }, {});
+    console.log(totalPricePerUser);
+    // console.log(order);
+
+    res.json(totalPricePerUser);
+
+  }catch(error){
+    res.status(404).json({ message: "Error occured while getting food!" });
+  }
+}
+
 const deleteOrder = async (req, res) =>{
     try {
         const order = await Order.findOneAndDelete({ _id: req.params.id });
@@ -154,6 +187,7 @@ module.exports = {
     deleteOrder,
     tokenRoute,
     validateCode,
+    getOrdersOfTheDay,
 }
 
 //google maps API key = AIzaSyD6s-1OllYQhM8mfw_5nqwwKPtym_IPO20

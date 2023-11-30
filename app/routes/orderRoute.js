@@ -4,7 +4,7 @@ const router = express.Router();
 const {
     getOrderUser,
     getOrderRestaurant,
-    //getCurrentUserOrders,
+    getOrdersOfTheDay,
     createOrder,
     tokenRoute,
     validateCode
@@ -16,6 +16,7 @@ router
 router.route("/deliveryCode").post(validateCode);
 router.route("/getOrderUser/:orderedBy").get(getOrderUser);
 router.route("/getOrderRestaurant/:restaurantId").get(getOrderRestaurant);
+router.route("/get-orders-per-day").get(getOrdersOfTheDay);
 
 router.route("/token").post(tokenRoute);
 

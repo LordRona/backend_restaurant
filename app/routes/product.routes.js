@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-// const upload = require("../controllers/product.controller");
+const { authJwt } = require("../middlewares");
 
 const verifySignup = require("../middlewares/verifySignUp");
 // const authJwt = require("../middlewares/authJwt");
@@ -21,11 +21,11 @@ const {
 } = require("../controllers/product.controller");
 
 router.route("/createProduct").post(upload.single('image'),createProduct);
-router.route("/getall").get(getAllProduct);
-router.route("/getDashboard").get(getDashboard);
-router.route("/search").get(searchProduct);
-router.route("/getAllProductsBySingleUser/:userId").get(getALLProductsBySingleUser);
-router.route("/:id").get(getSingleProduct).patch(updateProduct).delete(deleteProduct);
+router.route("/getall", authJwt.checkSuspendedAccount).get(getAllProduct);
+router.route("/getDashboard", authJwt.checkSuspendedAccount).get(getDashboard);
+router.route("/search", authJwt.checkSuspendedAccount).get(searchProduct);
+router.route("/getAllProductsBySingleUser/:userId", authJwt.checkSuspendedAccount).get(getALLProductsBySingleUser);
+router.route("/:id", authJwt.checkSuspendedAccount).get(getSingleProduct).patch(updateProduct).delete(deleteProduct);
 
 // router.route("/uploadImage")
 // .post([authJwt.verifyToken], uploadImage);

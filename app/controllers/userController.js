@@ -55,7 +55,7 @@ const suspendAccount = async (req, res) =>{
         if(!userId) return res.status(404).send("User not found!");
 
         User.findByIdAndUpdate(userId, {
-            status: "suspended"
+            status: true
         }, (err, user) => {
             if(err) return res.status(500).send(err);
             res.status(200).json({ msg: "User suspended successfully!" });

@@ -14,11 +14,11 @@ module.exports = function(app) {
 
   app.get("/api/test/all", controller.allAccess);
 
-  app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
+  app.get("/api/test/user", [authJwt.verifyToken, authJwt.checkSuspendedAccount], controller.userBoard);
 
   app.get(
     "/api/test/restaurant",
-    [authJwt.verifyToken, authJwt.isRestaurant],
+    [authJwt.verifyToken, authJwt.isRestaurant, authJwt.checkSuspendedAccount],
     controller.restaurantBoard
   );
 
