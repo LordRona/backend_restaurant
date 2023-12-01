@@ -123,6 +123,68 @@ const getOrdersOfTheDay = async (req, res) =>{
   }catch(error){
     res.status(404).json({ message: "Error occured while getting food!" });
   }
+};
+
+const getTotalAmountPerWeekPerUser = async (req, res) => {
+  try {
+    const today = new Date();
+    const weekAgo = new Date()
+    weekAgo.setDate(today.getDate() - 7);
+
+    const orders = await Order.find({
+      createdAt: { $gte: weekAgo, $lte: today },
+    });
+
+    const totalPricePerUser = orders.reduce((acc, order) => {
+      const { createdBy, price } = order;
+      if (!acc[createdBy]) {
+        acc[createdBy] = {
+          order: [order],
+          totalPrice: price,
+        };
+      } else {
+        acc[createdBy].order.push(order);
+        acc[createdBy].totalPrice += price;
+      }
+
+      return acc;
+    }, {});
+
+    res.json({ totalPricePerUser });
+  } catch (error) {
+    res.status(400).json({ msg: "Error occured!" });
+  }
+};
+
+const getTotalAmountPerMonthPerUser = async (req, res) => {
+  try {
+    const today = new Date();
+    const monthAgo = new Date();
+    monthAgo.setMonth(today.getMonth() - 1);
+
+    const orders = await Order.find({
+      createdAt: { $gte: monthAgo, $lte: today },
+    });
+
+    const totalPricePerUser = orders.reduce((acc, order) => {
+      const { createdBy, price } = order;
+      if (!acc[createdBy]) {
+        acc[createdBy] = {
+          order: [order],
+          totalPrice: price,
+        };
+      } else {
+        acc[createdBy].order.push(order);
+        acc[createdBy].totalPrice += price;
+      }
+
+      return acc;
+    }, {});
+
+    res.json({ totalPricePerUser });
+  } catch (error) {
+    res.status(401).json({ msg: "Error occured!" });
+  }
 }
 
 const deleteOrder = async (req, res) =>{
@@ -188,6 +250,8 @@ module.exports = {
     tokenRoute,
     validateCode,
     getOrdersOfTheDay,
+    getTotalAmountPerWeekPerUser,
+    getTotalAmountPerMonthPerUser
 }
 
 //google maps API key = AIzaSyD6s-1OllYQhM8mfw_5nqwwKPtym_IPO20

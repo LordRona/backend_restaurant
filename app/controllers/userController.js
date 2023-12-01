@@ -51,32 +51,52 @@ const suspendAccount = async (req, res) =>{
     try {
         const user = await User.findOne({ username: req.body.username });
         const userId = user.id;
+        // console.log(userId);
 
         if(!userId) return res.status(404).send("User not found!");
 
         User.findByIdAndUpdate(userId, {
-            status: true
+            suspended: true
         }, (err, user) => {
             if(err) return res.status(500).send(err);
-            res.status(200).json({ msg: "User suspended successfully!" });
+            res.status(200).json({ msg: "User suspended successfully!", user });
         })
     } catch (error) {
         res.status(401).json({ msg: "Internal server error!" });
     }
 };
 
-const searchUser = async (req, res) =>{
-    try {
-        const searchRestaurant = req.query.q;
+const unsuspendUser = async (req, res) =>{
+    try{
+        const user = await User.findOne({ username: req.body.username });
+        const userId = user.id;
 
-        const user = await User.find({
-            username: { $regex: searchRestaurant, $options: 'i' }
-        });
+        if(!userId) return res.status(404).send("User not found!");
 
-        res.status(200).json(user);
-    } catch (error) {
-        req.status(401).json({ msg: "Internal server error!" });
+        User.findByIdAndUpdate(userId, {
+            suspended: false
+        }, (err, user) => {
+            if(err) return res.status(500).send(err);
+            res.status(200).json({ msg: "User unsuspended successfully!", user });
+        })
+    }catch(error){
+        res.status(404).json({ msg: "Internal server error" });
     }
+}
+
+const searchUser = async (req, res) =>{
+    const { searchWord } = req.query
+
+  try{
+    const regex = new RegExp(searchWord, 'i');
+    const users = await User.find({ username: regex });
+
+    if(users.length === 0) return res.status(404).send("User not found!");
+
+    res.status(200).json({ users });
+  }catch(error){
+    res.status(401).json({ msg: "Internal server error!" });
+  }
 }
 
 
@@ -86,4 +106,5 @@ module.exports = {
     showCurrentUser,
     suspendAccount,
     searchUser,
+    unsuspendUser,
 }

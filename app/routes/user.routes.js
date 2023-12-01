@@ -1,6 +1,6 @@
 const { authJwt } = require("../middlewares");
 const controller = require("../controllers/user.controller");
-const { suspendAccount, searchUser} = require("../controllers/userController");
+const { suspendAccount, unsuspendUser } = require("../controllers/userController");
 const { app } = require("firebase-admin");
 
 module.exports = function(app) {
@@ -14,11 +14,11 @@ module.exports = function(app) {
 
   app.get("/api/test/all", controller.allAccess);
 
-  app.get("/api/test/user", [authJwt.verifyToken, authJwt.checkSuspendedAccount], controller.userBoard);
+  app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
 
   app.get(
     "/api/test/restaurant",
-    [authJwt.verifyToken, authJwt.isRestaurant, authJwt.checkSuspendedAccount],
+    [authJwt.verifyToken, authJwt.isRestaurant],
     controller.restaurantBoard
   );
 
@@ -34,8 +34,11 @@ module.exports = function(app) {
     controller.suspendAccount
   );
 
-  app.get("/api/test/search", 
-  [authJwt.verifyToken, authJwt.isAdmin], searchUser
-  );
+  app.put(
+    "/api/test/unsuspend",
+    [authJwt.verifyToken, authJwt.isAdmin, unsuspendUser], 
+    controller.unsuspendUser
+  )
+
 };
 

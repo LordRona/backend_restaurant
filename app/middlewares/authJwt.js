@@ -31,6 +31,11 @@ isRestaurant = (req, res, next) => {
       return;
     }
 
+    if(user.suspended) {
+      res.status(403).send({ message: "User suspended!" });
+      return;
+    }
+
     Role.find(
       {
         _id: { $in: user.roles }
@@ -86,20 +91,9 @@ isAdmin = (req, res, next) => {
   });
 };
 
-checkSuspendedAccount = (req, res, next) => {
-  const { status } = req.body;
-  
-  if (status) {
-    return res.status(403).send({ message: "Account suspended!" });
-  }
-
-  next();
-}
-
 const authJwt = {
   verifyToken,
   isAdmin,
   isRestaurant,
-  checkSuspendedAccount,
 };
 module.exports = authJwt;

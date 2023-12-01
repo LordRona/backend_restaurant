@@ -17,3 +17,7 @@ exports.restaurantBoard = (req, res) => {
 exports.suspendAccount = (req, res) => {
   res.status(200).send("Suspend Content.");
 }
+
+exports.unsuspendUser = (req, res) => {
+  res.status(200).send("Unsuspend Content.");
+}

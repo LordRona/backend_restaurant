@@ -18,6 +18,7 @@ const productRoute = require("./app/routes/product.routes");
 const reviewRoute = require("./app/routes/review.route");
 const userRoute = require("./app/routes/user.routes");
 const orderRoute  = require("./app/routes/orderRoute");
+const searchUser = require("./app/routes/user");
 
 const app = express();
 
@@ -139,6 +140,7 @@ app.use("/api/product", productRoute);
 app.use("/api/review" ,reviewRoute);
 app.use("/api/user", userRoute);
 app.use("/api/order", orderRoute);
+app.use("/api/search", searchUser);
 
 
 // set port, listen for requests
