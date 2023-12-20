@@ -94,10 +94,6 @@ app.post('/api/product/image', upload.single('image'), async(req, res) => {
     ContentType: imageFile.mimetype
   };
 
-  app.get("/", (req, res) =>{
-    res.json("Welcome to alziron systems app!");
-  })
-
   const uploadResult = await s3.upload(uploadParams).promise();
 
     // Get the S3 image URL
@@ -121,7 +117,7 @@ app.post('/api/product/image', upload.single('image'), async(req, res) => {
 }
 });
 
-app.get("/start", (req, res) =>{
+app.get("/", (req, res) =>{
   res.send("Welcome to alziron systems app!")
 });
 
