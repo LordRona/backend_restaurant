@@ -94,6 +94,10 @@ app.post('/api/product/image', upload.single('image'), async(req, res) => {
     ContentType: imageFile.mimetype
   };
 
+  app.get("/", (req, res) =>{
+    res.send("Welcome to alziron systems app!");
+  })
+
   const uploadResult = await s3.upload(uploadParams).promise();
 
     // Get the S3 image URL
@@ -148,7 +152,7 @@ app.use("/api/recommendation", recomendation);
 
 
 // set port, listen for requests
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
