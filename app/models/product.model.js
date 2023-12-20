@@ -33,6 +33,10 @@ const products = new mongoose.Schema({
         required: [true, "Please provide User id"],
         ref: 'User' 
     },
+    ownerName: {
+        type: String,
+        required: true
+      },
     key: {
         type: String,
         required: true,

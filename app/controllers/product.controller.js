@@ -55,7 +55,7 @@ const createProduct = async(req, res) => {
     const savedProducts = await newProduct.save();
     console.log("Product created successfully!", savedProducts, imageFile);
     res.status(200).json({message: "Product created successfully!" });
-    res.json({ imageUrl: req.file.location });
+  
   
   }catch(error){
     res.status(404).json({ message: `Error occured while creating product!` });
@@ -117,23 +117,25 @@ const updateProduct = async (req, res) =>{
 };
 
 const deleteProduct = async (req, res) =>{
-    const { id: productId, key } = req.params;
+    const { id } = req.params;
+    const Key = id;
     //Deleting from the S3 bucket
     const params = {
         Bucket: "newalzironbucket",
-        Key: key
+        Key: Key
     }
 
+    console.log(req.params);
     s3.deleteObject(params).promise();
-    console.log("Picture deleted successfully!", key);
+    console.log("Picture deleted successfully!", Key);
 
-    const product = await Product.findOneAndDelete({ _id: productId });
+    const product = await Product.findOneAndDelete({ Key: Key });
 
     if(!product) return res.status(404).json({ message: `Product not found!` });
 
     await product.remove();
     res.status(200).json({ msg: "Product successfully deleted!" });
-};
+};{}
 
 const searchProduct = async (req, res) => {
     const searchTerm = req.query.q; // Get the search query parameter from the request

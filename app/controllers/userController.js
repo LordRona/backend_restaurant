@@ -99,6 +99,12 @@ const searchUser = async (req, res) =>{
   }
 }
 
+const calculateUserBalancePerDay = async (req, res) =>{
+    try{}catch(error){
+        res.status(404).json({ msg: "Internal server error!" });
+    }
+}
+
 
 module.exports = {
     updateUserPassword,
@@ -107,4 +113,5 @@ module.exports = {
     suspendAccount,
     searchUser,
     unsuspendUser,
+    calculateUserBalancePerDay,
 }

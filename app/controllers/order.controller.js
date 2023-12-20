@@ -23,9 +23,12 @@ const createOrder = async (req, res) => {
   //   credential: admin.credential.cert(serviceAccount),
   // });
     try {
-      const uniqueCode = generateOTP();
-     
-      const newOrder = {...req.body,uniqueCode:uniqueCode}
+      
+      const newOrder = req.body.map((items)=>{
+        const uniqueCode = generateOTP();
+        return{...items,uniqueCode:uniqueCode}
+
+      })
       
       const registrationToken = req.body.token;
 
@@ -77,8 +80,13 @@ const createOrder = async (req, res) => {
 const getOrderRestaurant = async (req, res) =>{
   try{
     const  restaurantId  = req.params.restaurantId;
+    const currentdate = (new Data(Date.now() - 24 * 60 * 60 * 1000));
 
-    const food = await Order.find({ restaurantId });
+    const food = await Order.find({ 
+      restaurantId,
+      createdAt: { $gte: currentdate },
+      status: { $ne: "completed" },
+     });
 
     const order = await Order.findOne().select("uniqueCode").sort({ _id: -1 });
 
@@ -187,6 +195,29 @@ const getTotalAmountPerMonthPerUser = async (req, res) => {
   }
 }
 
+const getUserBalance = async (req, res) =>{
+  try{
+    const user = await User.findOne({ username: req.params.username });
+    const userId = user.id;
+
+    const orders = await Order.find({ 
+      createdBy: userId,
+      status: "completed",
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+
+    let totalAmount = 0;
+    for(const order of orders){
+      totalAmount += order.price;
+    }
+
+    res.status(200).json({ totalAmount });
+    
+  }catch(error){
+    res.status(404).json({ message: "Error occured while getting user balance!" });
+  }
+}
+
 const deleteOrder = async (req, res) =>{
     try {
         const order = await Order.findOneAndDelete({ _id: req.params.id });
@@ -249,6 +280,7 @@ module.exports = {
     deleteOrder,
     tokenRoute,
     validateCode,
+    getUserBalance,
     getOrdersOfTheDay,
     getTotalAmountPerWeekPerUser,
     getTotalAmountPerMonthPerUser

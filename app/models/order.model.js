@@ -56,7 +56,7 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
     },
     status:{
         type: String,
-        enum: ["pending", "failed", "delivered", "paid", "canceled"],
+        enum: ["pending", "failed", "completed", "canceled"],
         default: "pending",
     },
     token: [{
