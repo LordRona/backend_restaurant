@@ -95,7 +95,7 @@ app.post('/api/product/image', upload.single('image'), async(req, res) => {
   };
 
   app.get("/", (req, res) =>{
-    res.send("Welcome to alziron systems app!");
+    res.json("Welcome to alziron systems app!");
   })
 
   const uploadResult = await s3.upload(uploadParams).promise();
