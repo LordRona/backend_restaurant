@@ -1,6 +1,6 @@
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
-const Token = require("../models/token.model");
+// const Token = require("../models/token.model");
 const Product = require("../models/product.model");
 const firebase = require('firebase-admin');
 const { user } = require("../models");
@@ -34,27 +34,27 @@ const createOrder = async (req, res) => {
 
       let products = await Order.create(newOrder);
 
-      // const savedOrder = await order.save();
-      // console.log('Order saved:', savedOrder);
-      // res.json(savedOrder);
-      
-      // const messaging = firebase.messaging();
+      const token_creator_id = Order.map((product) => product.createdBy);
 
-      // const message = {
-      //   token: registrationToken,
-      //   notification: {
-      //     title: 'New Order!',
-      //     body: 'Your order has been created!',
-      //   },
-      // };
+      const users_with_token = await User.find({ _id: { $in: token_creator_id } }).distinct("fcmToken");
       
-      // admin.messaging().send(message)
-      //   .then((response) => {
-      //     console.log('Push notification sent successfully:', response);
-      //   })
-      //   .catch((error) => {
-      //     console.log('Error sending push notification:', error);
-      //   });
+      const messaging = firebase.messaging();
+
+      const message = {
+        token: registrationToken,
+        notification: {
+          title: 'New Order!',
+          body: 'Your Food has been ordered!',
+        },
+      };
+      
+      admin.messaging().send(message)
+        .then((response) => {
+          console.log('Push notification sent successfully:', response);
+        })
+        .catch((error) => {
+          console.log('Error sending push notification:', error);
+        });
 
 
       // res.status(200).json({ message: "Order Placed successfully!" });

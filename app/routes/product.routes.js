@@ -12,7 +12,7 @@ const {
     createProduct,
     getAllProduct,
     getSingleProduct,
-    updateProduct,
+    getProductByCategory,
     deleteProduct,
     getALLProductsBySingleUser,
     getDashboard,
@@ -24,8 +24,9 @@ router.route("/createProduct").post(upload.single('image'),createProduct);
 router.route("/getall", authJwt.checkSuspendedAccount).get(getAllProduct);
 router.route("/getDashboard", authJwt.checkSuspendedAccount).get(getDashboard);
 router.route("/search", authJwt.checkSuspendedAccount).get(searchProduct);
+router.route("/get-product-category").get(getProductByCategory);
 router.route("/getAllProductsBySingleUser/:userId", authJwt.checkSuspendedAccount).get(getALLProductsBySingleUser);
-router.route("/:id", authJwt.checkSuspendedAccount).get(getSingleProduct).patch(updateProduct).delete(deleteProduct);
+router.route("/:id", authJwt.checkSuspendedAccount).get(getSingleProduct)/*.patch(updateProduct)*/.delete(deleteProduct);
 
 // router.route("/uploadImage")
 // .post([authJwt.verifyToken], uploadImage);

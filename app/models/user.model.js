@@ -49,6 +49,13 @@ const User = mongoose.model(
       required: false
         }
       }],
+      
+    firebaseToken: [{
+        token: {
+        type: String,
+        required: false
+          }
+        }],
 
     roles: [
       {

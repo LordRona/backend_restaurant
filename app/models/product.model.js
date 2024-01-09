@@ -1,3 +1,4 @@
+const { date } = require("joi");
 const mongoose = require("mongoose");
 
 const products = new mongoose.Schema({
@@ -7,23 +8,22 @@ const products = new mongoose.Schema({
         required: [true, "Please provide product name"],
         maxlength: [100, "Name can not be more than 100 characters"]
     },
-    // description: { 
-    //     type: String,
-    //     required: [true, "Please provide product description"],
-    //     maxlength: [1000, "Decription can not exceed 1000 characters"],
-    // },
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+    },
     price: { 
         type: Number,
         required: [true, "Please provide price"],
         default: 0,
     },
-    // category: {
-    //     type: String,
-    //     ref: "Category",
-    //     required: [true, "Please provide category field"],
-    //     enum: ["all", "fruits", "african", "foriegn"],
-    //     default: "all"
-    // },
+    category: {
+        type: String,
+        ref: "Category",
+        required: [true, "Please provide category field"],
+        enum: ["all", "salad", "local", "foriegn"],
+        default: "all"
+    },
     image: {
         type: String,
         default: "/uploads/example.jpeg",
@@ -37,10 +37,6 @@ const products = new mongoose.Schema({
         type: String,
         required: true
       },
-    key: {
-        type: String,
-        required: true,
-    },
     ownerLocation: {
         type: String,
         required: true,

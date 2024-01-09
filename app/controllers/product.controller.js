@@ -1,67 +1,97 @@
 const Product  = require("../models/product.model");
 const User = require("../models/user.model");
 const multer = require("multer");
-const AWS = require('aws-sdk');
 const sharp = require("sharp");
-const { user } = require("../models");
+const mongoose = require("mongoose")
+const dbConfig = require("../config/db.config");
+const AWS = require("aws-sdk")
 
-// Configure multer for handling file uploads
+require('dotenv').config()
+
+//Firebase
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./erestau-1-firebase.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`,
+  storageBucket: process.env.BUCKET_URL
+});
+
+// Multer configuration
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-AWS.config.update({
-    accessKeyId: process.env.ACCESS_KEY,
-    secretAccessKey: process.env.SECRETE_ACCESS,
-    region: process.env.REGION,
-  });
-  const s3 = new AWS.S3();
+const createProduct = async (req, res) => {
+  try {
 
+    const { originalname, buffer } = req.file;
 
-const createProduct = async(req, res) => {
-    try{ 
-    const imageFile = req.file;
-  
-  
-    const compressedImageBuffer = await sharp(imageFile.buffer)
-    .toFormat("jpeg").jpeg({ quality: 70}).toBuffer();
-  
-     // Upload the compressed image file to S3 bucket
-     const uploadParams = {
-      Bucket: 'newalzironbucket',
-      Key: `${Date.now()}-${imageFile.originalname}`,
-      Body: compressedImageBuffer,
-      ACL: 'public-read',
-      ContentType: imageFile.mimetype
-    };
-  
-    const uploadResult = await s3.upload(uploadParams).promise();
+    const compressedImageBuffer = await sharp(buffer)
+    .resize({ width: 800 }).jpeg({ quality: 70 }).toBuffer();
+
+    // Create a unique filename for the uploaded image
+    const filename = `${Date.now()}_${originalname}`;
+
+    // Upload the image file to Firebase Storage
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(filename);
+    const uploadResult = await file.save(compressedImageBuffer, {
+      metadata: {
+        contentType: req.file.mimetype, // Set the appropriate content type for your image
+      },
+    });
+
+    // Get the public URL of the uploaded image
+    const url = await file.getSignedUrl({
+      action: 'read',
+      expires: '03-01-2500' // Set an appropriate expiration date
+    });
 
     const user = await User.findOne({ username: req.body.username });
-  
-      // Get the S3 image URL
-      const imageUrl = uploadResult.Location;
-    //.replace(/\s/g, '');
+
     const newProduct = new Product({
-      name: req.body.name,
-      price: req.body.price,
-      quantity: req.body.quantity,
-      image: uploadResult.Location,
-      owner: user.id,
-      ownerName: req.body.username,
-      ownerLocation: user.location,
-      key: uploadResult.Key
-    });
-  
-    const savedProducts = await newProduct.save();
-    console.log("Product created successfully!", savedProducts, imageFile);
-    res.status(200).json({message: "Product created successfully!" });
-  
-  
-  }catch(error){
-    res.status(404).json({ message: `Error occured while creating product!` });
-    console.log(error);
+            name: req.body.name,
+            price: req.body.price,
+            quantity: req.body.quantity,
+            image: uploadResult,
+            owner: user.id,
+            ownerName: req.body.username,
+            category: req.body.category,
+            ownerLocation: user.location,
+            imageUrl: url
+          });
+        
+          const savedProducts = await newProduct.save();
+         console.log(savedProducts);
+
+    res.status(200).json({ url });
+
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).send('An error occurred while uploading the image.');
   }
-  };  
+}
+
+const getProductByCategory = async(req, res)=>{
+  try {
+    const categoryName = req.body.category;
+
+    const date = new Date();
+    date.setHours(0,0,0,0);
+
+    const category = await Product.find({ 
+      categoryName,
+      createdAt: { $gte: date },
+    });
+
+    res.status(200).json({ category });
+  } catch (error) {
+    res.status(404).json({ msg: "Error occured while getting product by category" });
+  }
+}
+
 
 const getAllProduct = async (req, res) =>{
     const products = await Product.find({});
@@ -87,7 +117,7 @@ const product = await Product.findById(req.params.id);
 const getDashboard = async (req, res) =>{
     try{
         const product = await Product.find({})
-        .sort({ createdAt: -1 }).limit(20).populate("owner", "username");
+        .sort({ createdAt: -1 }).limit(20)
 
         res.status(200).json({ product });
     }catch(error){
@@ -95,46 +125,47 @@ const getDashboard = async (req, res) =>{
     }
 }
 
-const updateProduct = async (req, res) =>{
-    const { id: productID } = req.params;
-    const { key, file } = req.body;
-    const params = {
-        Bucket: "newalzironbucket",
-        Key: key,
-        Body: file
-    }
+// const updateProduct = async (req, res) =>{
+//     const { id: productID } = req.params;
+//     const { key, file } = req.body;
+//     const params = {
+//         Bucket: "newalzironbucket",
+//         Key: key,
+//         Body: file
+//     }
 
-    await s3Storage.upload(params).promise();
+//     await s3Storage.upload(params).promise();
 
-    const product = await Product.findOneAndUpdate({ _id: productID }, req.body, {
-        new: true,
-        runValidators: true,
-    });
+//     const product = await Product.findOneAndUpdate({ _id: productID }, req.body, {
+//         new: true,
+//         runValidators: true,
+//     });
 
-    if(!product) return res.status(404).send("Product to be updated not found!");
+//     if(!product) return res.status(404).send("Product to be updated not found!");
 
-    res.status(200).json({ product });
-};
+//     res.status(200).json({ product });
+// };
 
 const deleteProduct = async (req, res) =>{
     const { id } = req.params;
-    const Key = id;
-    //Deleting from the S3 bucket
-    const params = {
-        Bucket: "newalzironbucket",
-        Key: Key
-    }
+   try{
+    const image = await Product.findOne({ id });
 
-    console.log(req.params);
-    s3.deleteObject(params).promise();
-    console.log("Picture deleted successfully!", Key);
+    if(!image){
+      res.send("Image not found!");
+    };
 
-    const product = await Product.findOneAndDelete({ Key: Key });
+     // Delete the image from Firebase Storage
+     const bucket = admin.storage().bucket();
+     await bucket.file(image.url).delete();
 
-    if(!product) return res.status(404).json({ message: `Product not found!` });
+     // Delete the image record from MongoDB
+    await collection.deleteOne({ _id : id });
 
-    await product.remove();
-    res.status(200).json({ msg: "Product successfully deleted!" });
+    res.status(200).json({ message: 'Image deleted successfully!' });
+   }catch(err){
+    res.status(404).json({ msg: "Error while deleting picture!" });
+   }
 };{}
 
 const searchProduct = async (req, res) => {
@@ -155,7 +186,7 @@ module.exports = {
     createProduct,
     getAllProduct,
     getSingleProduct,
-    updateProduct,
+    getProductByCategory,
     deleteProduct,
     getALLProductsBySingleUser,
     getDashboard,

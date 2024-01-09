@@ -48,11 +48,12 @@ db.mongoose
     process.exit();
   });
 
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`
-});
+  if (!admin.apps.length) {
+    const firebaseAdmin = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`
+    });
+};
 
 const message = {
   Notification: {
