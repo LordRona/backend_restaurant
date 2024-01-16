@@ -21,7 +21,7 @@ const products = new mongoose.Schema({
         type: String,
         ref: "Category",
         required: [true, "Please provide category field"],
-        enum: ["all", "salad", "local", "foriegn"],
+        enum: ["all", "salad", "local", "pizza", "sandwich", "snacks"],
         default: "all"
     },
     image: {
@@ -41,11 +41,15 @@ const products = new mongoose.Schema({
         type: String,
         required: true,
     },
-    quantity: {
-        type: Number,
-        required: true,
-        default: 0
-    }
+    path: {
+      type: String,
+      required: true,
+    },
+    // quantity: {
+    //     type: Number,
+    //     required: true,
+    //     default: 0
+    // }
   }, { timestamps: true });
   products.virtual('reviews', {
     ref: 'Review',

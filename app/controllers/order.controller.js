@@ -1,11 +1,20 @@
 const Order = require("../models/order.model");
 const User = require("../models/user.model");
-// const Token = require("../models/token.model");
 const Product = require("../models/product.model");
-const firebase = require('firebase-admin');
-const { user } = require("../models");
-const { restaurantConnections } = require("../../app");
+const admin = require('firebase-admin');
+const Token = require("../models/user-token");
 
+
+
+const serviceAccount = require('../../e-restou-alziron-firebase-adminsdk-37aq4-883e03d2e8.json');
+const { response } = require("express");
+
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: process.env.BUCKET_URL,
+  });
+
+  
 function generateOTP() {
   const min = 100000; // Minimum value (inclusive)
   const max = 999999; // Maximum value (inclusive)
@@ -17,52 +26,47 @@ const otp = generateOTP();
 
 //Create Order controller
 const createOrder = async (req, res) => {
-  // const serviceAccount = require('../../e-restou-alziron-firebase-adminsdk-37aq4-883e03d2e8.json');
-
-  // admin.initializeApp({
-  //   credential: admin.credential.cert(serviceAccount),
-  // });
     try {
-      
-      const newOrder = req.body.map((items)=>{
+
+      const newOrder = req.body.order.map((items)=>{
         const uniqueCode = generateOTP();
         return{...items,uniqueCode:uniqueCode}
-
-      })
-      
-      const registrationToken = req.body.token;
+      });
 
       let products = await Order.create(newOrder);
 
-      const token_creator_id = Order.map((product) => product.createdBy);
-
-      const users_with_token = await User.find({ _id: { $in: token_creator_id } }).distinct("fcmToken");
-      
-      const messaging = firebase.messaging();
-
-      const message = {
-        token: registrationToken,
-        notification: {
-          title: 'New Order!',
-          body: 'Your Food has been ordered!',
-        },
-      };
-      
-      admin.messaging().send(message)
-        .then((response) => {
-          console.log('Push notification sent successfully:', response);
+      const userTokens = await Promise.all(
+        newOrder.map(async (order) =>{
+          try{
+            const users = await Token.find({ userId: order.createdBy });
+            users.forEach((user) => {
+              const message = {
+                token: user.token,
+                notification: {
+                  title: "New Order!",
+                  body: ` Mr ${order.customerName} from ${order.customerLocation} has purchased ${order.quantity} orders of ${order.productName} with unique code ${order.uniqueCode} `,
+                },
+              };
+              admin
+              .messaging()
+              .send(message)
+              .then((response) =>{
+                console.log("Push notification sent successfully!", response);
+              }).catch((error) =>{
+                console.log("Error sending push notification!", error);
+              });
+            });
+            return users;
+          }catch(error){
+            res.status(404).json({ msg: "Error occured!" });
+          }
         })
-        .catch((error) => {
-          console.log('Error sending push notification:', error);
-        });
-
-
-      // res.status(200).json({ message: "Order Placed successfully!" });
-  
-      res.json(products);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+      );
+      
+      res.json(products)
+      } catch (error) {
+        console.error('Error sending FCM notification:', error);
+      }
   };
 
   const getOrderUser = async (req, res) =>{

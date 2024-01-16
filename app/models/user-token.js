@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
-const notificationSchema = new mongoose.Schema({
-    recipient: {
+const tokenSchema = new mongoose.Schema({
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: [true, "Please provide User id"],
     },
-    message: {
+    token: {
         type: String,
         required: [true, "Please provide message"],
     }
@@ -18,4 +18,4 @@ const notificationSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Notification", notificationSchema);
+module.exports = mongoose.model("Token", tokenSchema);

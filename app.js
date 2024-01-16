@@ -20,6 +20,7 @@ const userRoute = require("./app/routes/user.routes");
 const orderRoute  = require("./app/routes/orderRoute");
 const searchUser = require("./app/routes/user");
 const calculateUserBalancePerDay = require("./app/routes/user");
+const user_token = require("./app/routes/user");
 const recomendation = require("./app/routes/recommendation.route");
 
 const app = express();
@@ -146,6 +147,7 @@ app.use("/api/order", orderRoute);
 app.use("/api/search", searchUser);
 app.use("/api/", calculateUserBalancePerDay);
 app.use("/api/recommendation", recomendation);
+app.use("/api", user_token);
 
 
 // set port, listen for requests

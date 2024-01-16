@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const userLocation = require("../models/user.model");
+const Token = require("../models/user-token");
 const { VerifyToken } = require("../middlewares/authJwt");
 const db = require("../models");
 const Role = db.role;
@@ -105,6 +105,29 @@ const calculateUserBalancePerDay = async (req, res) =>{
     }
 }
 
+const createUserToken = async (req, res)=>{
+    try {
+        const token = req.body.token;
+        const user = await User.findOne({ username: req.body.username });
+        const userId = user.id;
+
+        if(!token || userId){
+            res.status(404).json({ msg: "User not found! or Token not found!" });
+        }
+
+        const newToken = new Token({
+            userId,
+            token
+        });
+
+        await newToken.save();
+      
+        res.status(200).json({ newToken });
+    } catch (error) {
+        res.status(404).json({ msg: "Error occured while getting user token!" });
+    }
+}
+
 
 module.exports = {
     updateUserPassword,
@@ -114,4 +137,5 @@ module.exports = {
     searchUser,
     unsuspendUser,
     calculateUserBalancePerDay,
+    createUserToken,
 }

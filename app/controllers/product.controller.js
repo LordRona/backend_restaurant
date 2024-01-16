@@ -4,7 +4,7 @@ const multer = require("multer");
 const sharp = require("sharp");
 const mongoose = require("mongoose")
 const dbConfig = require("../config/db.config");
-const AWS = require("aws-sdk")
+const AWS = require("aws-sdk");
 
 require('dotenv').config()
 
@@ -12,12 +12,13 @@ require('dotenv').config()
 var admin = require("firebase-admin");
 
 var serviceAccount = require("./erestau-1-firebase.json");
+const { collection } = require("../models/order.model");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`,
+  // databaseURL: `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`,
   storageBucket: process.env.BUCKET_URL
-});
+}, "bucket");
 
 // Multer configuration
 const storage = multer.memoryStorage();
@@ -54,13 +55,12 @@ const createProduct = async (req, res) => {
     const newProduct = new Product({
             name: req.body.name,
             price: req.body.price,
-            quantity: req.body.quantity,
-            image: uploadResult,
-            owner: user.id,
-            ownerName: req.body.username,
             category: req.body.category,
+            image: url[0],
+            owner: user._id,
+            ownerName: req.body.username,
             ownerLocation: user.location,
-            imageUrl: url
+            path: filename
           });
         
           const savedProducts = await newProduct.save();
@@ -149,30 +149,34 @@ const getDashboard = async (req, res) =>{
 const deleteProduct = async (req, res) =>{
     const { id } = req.params;
    try{
-    const image = await Product.findOne({ id });
+    const image = await Product.findOne({ _id: id });
 
     if(!image){
-      res.send("Image not found!");
+      res.status(200).json("Image not found!");
     };
 
      // Delete the image from Firebase Storage
-     const bucket = admin.storage().bucket();
-     await bucket.file(image.url).delete();
+     admin.storage().bucket().file(image.path).delete();
 
      // Delete the image record from MongoDB
-    await collection.deleteOne({ _id : id });
+    await Product.deleteOne({ _id : id });
 
     res.status(200).json({ message: 'Image deleted successfully!' });
    }catch(err){
     res.status(404).json({ msg: "Error while deleting picture!" });
    }
-};{}
+};
 
 const searchProduct = async (req, res) => {
     const searchTerm = req.query.q; // Get the search query parameter from the request
   
     try {
-      const results = await Product.find({ name: { $regex: searchTerm, $options: 'i' } });
+      const results = await Product.find({ 
+        $or: [ 
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { category: { $regex: searchTerm, $options: 'i' } }
+        ]
+     });
   
       res.json(results);
     } catch (error) {
