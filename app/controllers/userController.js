@@ -110,9 +110,17 @@ const createUserToken = async (req, res)=>{
         const token = req.body.token;
         const user = await User.findOne({ username: req.body.username });
         const userId = user.id;
+        const isTokenAvailable = await Token.findOne({ userId: userId });
 
-        if(!token || userId){
+        if(isTokenAvailable){
+            console.log("Token already exists!")
+            return
+        }
+
+        if(!token || !userId){
+            console.log("User not found! or Token not found!")
             res.status(404).json({ msg: "User not found! or Token not found!" });
+            return;
         }
 
         const newToken = new Token({

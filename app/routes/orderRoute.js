@@ -18,7 +18,7 @@ router
       .post(createOrder);
 router.route("/deliveryCode").post(validateCode);
 router.route("/getOrderUser/:orderedBy").get(getOrderUser);
-router.route("/getOrderRestaurant/:restaurantId").get(getOrderRestaurant);
+router.route("/getOrderRestaurant/:createdBy").get(getOrderRestaurant);
 router.route("/get-orders-per-day").get(getOrdersOfTheDay);
 router.route("/get-orders-per-week").get(getTotalAmountPerWeekPerUser);
 router.route("/get-orders-per-month").get(getTotalAmountPerMonthPerUser);

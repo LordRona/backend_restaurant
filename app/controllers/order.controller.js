@@ -28,7 +28,7 @@ const otp = generateOTP();
 const createOrder = async (req, res) => {
     try {
 
-      const newOrder = req.body.order.map((items)=>{
+      const newOrder = req.body.map((items)=>{
         const uniqueCode = generateOTP();
         return{...items,uniqueCode:uniqueCode}
       });
@@ -62,7 +62,7 @@ const createOrder = async (req, res) => {
           }
         })
       );
-      
+
       res.json(products)
       } catch (error) {
         console.error('Error sending FCM notification:', error);
@@ -83,24 +83,18 @@ const createOrder = async (req, res) => {
 
 const getOrderRestaurant = async (req, res) =>{
   try{
-    const  restaurantId  = req.params.restaurantId;
-    const currentdate = (new Data(Date.now() - 24 * 60 * 60 * 1000));
+    const  restaurantId  = req.params.createdBy;
 
-    const food = await Order.find({ 
-      restaurantId,
-      createdAt: { $gte: currentdate },
-      status: { $ne: "completed" },
-     });
-
-    const order = await Order.findOne().select("uniqueCode").sort({ _id: -1 });
-
-    if(!food && !order){
-      res.status(404).json({ message: "No Food present present in Cart" });
-    };
-
-    res.status(200).json({ food, order });
+    Order.find({ createdBy: restaurantId, status: { $ne: "completed" } }, (err, orders) => {
+      if(err){
+        res.status(500).json({ msg: "Error while getting orders" });
+      }else{
+        res.status(200).json({ orders });
+      }
+    });
+    
   }catch(error){
-    res.status(404).json({ message: "Error occured while getting food!" });
+    res.status(404).json({ message: "Error occured while getting restaurant food!" });
   }
 }
 
@@ -258,18 +252,25 @@ const tokenRoute = async(req, res) =>{
 const validateCode = async(req, res) =>{
   try {
     const code = req.body.uniqueCode;
-    const orderedBy = req.body.orderedBy;
+  // const orderedBy = req.body.orderedBy;
 
-    Order.findOne({ uniqueCode: code }, (err, result) =>{
-      if(err) res.status(404).json({ msg: "Error Occured!" });
-
-      const orderId = result.orderedBy.toString()
-      if(result.uniqueCode === code.toString() && orderedBy === orderId){
-        res.status(200).json({ msg: "Delivery confirmed!" });
-      }else{
-        res.status(404).json({ msg: "Wrong code inserted" });
-      }
-    });
+  Order.findOne({ uniqueCode: code }, (err, result) => {
+    if (err) {
+      res.status(404).json({ msg: "Error Occurred!" });
+    } else if (result) {
+      // Update the order status
+      result.status = "completed";
+      result.save((err) => {
+        if (err) {
+          res.status(500).json({ msg: "Failed to update order status" });
+        } else {
+          res.status(200).json({ msg: "Delivery confirmed!" });
+        }
+      });
+    } else {
+      res.status(404).json({ msg: "Wrong code inserted" });
+    }
+  });
   
   } catch (error) {
     res.status(400).json({ msg: "Error occured!" });
