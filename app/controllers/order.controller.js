@@ -98,6 +98,22 @@ const getOrderRestaurant = async (req, res) =>{
   }
 }
 
+const getOrdersCompleted = async (req, res) => {
+  try {
+    const createdBy = req.params.createdBy;
+
+    Order.find({ createdBy: createdBy, status: 'completed' }, (err, orders) => {
+      if (err) {
+        res.status(500).json({ msg: 'Error retrieving completed orders' });
+      } else {
+        res.status(200).json({ orders });
+      }
+    });
+  } catch (error) {
+    res.status(404).json({ msg: "Error Occured while getting completed orders" });
+  }
+}
+
 const getOrdersOfTheDay = async (req, res) =>{
   try{
     const today = new Date();
@@ -287,6 +303,7 @@ module.exports = {
     validateCode,
     getUserBalance,
     getOrdersOfTheDay,
+    getOrdersCompleted,
     getTotalAmountPerWeekPerUser,
     getTotalAmountPerMonthPerUser
 }
