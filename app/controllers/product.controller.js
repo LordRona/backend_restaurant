@@ -38,7 +38,7 @@ const createProduct = async (req, res) => {
     // Upload the image file to Firebase Storage
     const bucket = admin.storage().bucket();
     const file = bucket.file(filename);
-    const uploadResult = await file.save(compressedImageBuffer, {
+    await file.save(compressedImageBuffer, {
       metadata: {
         contentType: req.file.mimetype, // Set the appropriate content type for your image
       },
@@ -124,27 +124,6 @@ const getDashboard = async (req, res) =>{
         res.status(404).json({ message: "Error occured while getting recent product!" });
     }
 }
-
-// const updateProduct = async (req, res) =>{
-//     const { id: productID } = req.params;
-//     const { key, file } = req.body;
-//     const params = {
-//         Bucket: "newalzironbucket",
-//         Key: key,
-//         Body: file
-//     }
-
-//     await s3Storage.upload(params).promise();
-
-//     const product = await Product.findOneAndUpdate({ _id: productID }, req.body, {
-//         new: true,
-//         runValidators: true,
-//     });
-
-//     if(!product) return res.status(404).send("Product to be updated not found!");
-
-//     res.status(200).json({ product });
-// };
 
 const deleteProduct = async (req, res) =>{
     const { id } = req.params;

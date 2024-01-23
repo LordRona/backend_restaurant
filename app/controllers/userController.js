@@ -137,6 +137,27 @@ const createUserToken = async (req, res)=>{
 }
 
 
+const makeUserVerified = async (req, res) =>{
+    try {
+     
+     const { userId } = req.params;
+
+     const user = await User.findById(userId);
+
+     if(!user){
+        res.status(404).json({ msg: "Error occured!" });
+     }
+
+     user.verifyUser = true;
+     await user.save();
+ 
+     res.status(200).json({ msg: "User verified successfully!" });
+    } catch (error) {
+     res.status(404).json({ msg: "Error while making user verified!"})
+    }
+ };
+
+
 module.exports = {
     updateUserPassword,
     updateUserNameAndPhone,
@@ -146,4 +167,5 @@ module.exports = {
     unsuspendUser,
     calculateUserBalancePerDay,
     createUserToken,
+    makeUserVerified,
 }

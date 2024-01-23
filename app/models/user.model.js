@@ -10,6 +10,10 @@ const User = mongoose.model(
       trim: true,
       lowercase: true
     },
+    verifyUser:{
+      type: Boolean,
+      default: "false"
+    },
     phone: {
       type: Number,
       required: true,

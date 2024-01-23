@@ -3,7 +3,7 @@ const router = express.Router();
 const { authJwt } = require("../middlewares");
 
 const verifySignup = require("../middlewares/verifySignUp");
-// const authJwt = require("../middlewares/authJwt");
+const { verifyUser } = require("../middlewares/verify.restaurant");
 const controller = require("../controllers/user.controller");
 
 // const upload = multer({ dest: "upload/"});
@@ -20,7 +20,7 @@ const {
     upload,
 } = require("../controllers/product.controller");
 
-router.route("/createProduct").post(upload.single('image'),createProduct);
+router.route("/createProduct", verifyUser).post(upload.single('image'),createProduct);
 router.route("/getall", authJwt.checkSuspendedAccount).get(getAllProduct);
 router.route("/getDashboard", authJwt.checkSuspendedAccount).get(getDashboard);
 router.route("/search", authJwt.checkSuspendedAccount).get(searchProduct);
