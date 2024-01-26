@@ -12,30 +12,30 @@ module.exports = function(app) {
     next();
   });
 
-  app.get("/api/test/all", controller.allAccess);
+  app.get(`${process.env.API_VERSION}/test/all`, controller.allAccess);
 
-  app.get("/api/test/user", [authJwt.verifyToken], controller.userBoard);
+  app.get(`${process.env.API_VERSION}/test/user`, [authJwt.verifyToken], controller.userBoard);
 
   app.get(
-    "/api/test/restaurant",
+    `${process.env.API_VERSION}/test/restaurant`,
     [authJwt.verifyToken, authJwt.isRestaurant],
     controller.restaurantBoard
   );
 
   app.get(
-    "/api/test/admin",
+    `${process.env.API_VERSION}/test/admin`,
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard
   );
 
   app.put(
-    "/api/test/suspend",
+    `${process.env.API_VERSION}/test/suspend`,
     [authJwt.verifyToken, authJwt.isAdmin, suspendAccount],
     controller.suspendAccount
   );
 
   app.put(
-    "/api/test/unsuspend",
+    `${process.env.API_VERSION}/test/unsuspend`,
     [authJwt.verifyToken, authJwt.isAdmin, unsuspendUser], 
     controller.unsuspendUser
   )

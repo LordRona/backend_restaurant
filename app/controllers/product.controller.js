@@ -26,6 +26,11 @@ const upload = multer({ storage: storage });
 
 const createProduct = async (req, res) => {
   try {
+    const user = await User.findOne({ username: req.body.username });
+    if(!user.verifyUser){
+      res.status(200).json({error:"Restaurant not verified"})
+      return
+    }
 
     const { originalname, buffer } = req.file;
 
@@ -50,7 +55,6 @@ const createProduct = async (req, res) => {
       expires: '03-01-2500' // Set an appropriate expiration date
     });
 
-    const user = await User.findOne({ username: req.body.username });
 
     const newProduct = new Product({
             name: req.body.name,

@@ -8,9 +8,7 @@ const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
 const serviceAccount = require("./e-restou-alziron-firebase-adminsdk-37aq4-883e03d2e8.json");
 mongoose.set('strictQuery', false);
-const Product = require("./app/models/product.model");
 const AWS = require('aws-sdk');
-const sharp = require("sharp");
 require('dotenv').config();
 
 //routers
@@ -79,77 +77,23 @@ const s3 = new AWS.S3();
 
 app.use(express.static('./uploads'));
 
-// Handle image upload
-app.post('/api/product/image', upload.single('image'), async(req, res) => {
-  try{ 
-  const imageFile = req.file;
-
-
-  const compressedImageBuffer = await sharp(imageFile.buffer)
-  .toFormat("jpeg").jpeg({ quality: 70}).toBuffer();
-
-   // Upload the compressed image file to S3 bucket
-   const uploadParams = {
-    Bucket: 'newalzironbucket',
-    Key: `${Date.now()}-${imageFile.originalname}`,
-    Body: compressedImageBuffer,
-    ACL: 'public-read',
-    ContentType: imageFile.mimetype
-  };
-
-  const uploadResult = await s3.upload(uploadParams).promise();
-
-    // Get the S3 image URL
-    const imageUrl = uploadResult.Location;
-  //.replace(/\s/g, '');
-  const newProduct = new Product({
-    name: req.body.name,
-    price: req.body.price,
-    quantity: req.body.quantity,
-    image: imageUrl
-  });
-
-  const savedProducts = await newProduct.save();
-  console.log("Product created successfully!", savedProducts, imageFile);
-  res.status(200).json({message: "Product created successfully!" });
-  res.json({ imageUrl: req.file.location });
-
-}catch(error){
-  res.status(404).json({ message: `Error occured while creating product!` });
-  console.log(error);
-}
-});
-
 app.get("/", (req, res) =>{
   res.send("Welcome to alziron systems app!")
 });
-
-// app.get('/search', async (req, res) => {
-//   const searchTerm = req.query.q; // Get the search query parameter from the request
-
-//   try {
-//     const results = await Product.find({ name: { $regex: searchTerm, $options: 'i' } });
-
-//     res.json(results);
-//   } catch (error) {
-//     console.error('Error performing search:', error);
-//     res.status(500).json({ error: 'An error occurred during the search' });
-//   }
-// });
 
 // routes
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 
-app.use("/api/product", productRoute);
-app.use("/api/review" ,reviewRoute);
-app.use("/api/user", userRoute);
-app.use("/api/order", orderRoute);
-app.use("/api/search", searchUser);
-app.use("/api/", calculateUserBalancePerDay);
-app.use("/api/recommendation", recomendation);
-app.use("/api", user_token);
-app.use("/api/verify", makeUserVerified);
+app.use(`${process.env.API_VERSION}/product`, productRoute);
+app.use(`${process.env.API_VERSION}/review` ,reviewRoute);
+app.use(`${process.env.API_VERSION}/user`, userRoute);
+app.use(`${process.env.API_VERSION}/order`, orderRoute);
+app.use(`${process.env.API_VERSION}/search`, searchUser);
+app.use(`${process.env.API_VERSION}/`, calculateUserBalancePerDay);
+app.use(`${process.env.API_VERSION}/recommendation`, recomendation);
+app.use(`${process.env.API_VERSION}`, user_token);
+app.use(`${process.env.API_VERSION}/verify`, makeUserVerified);
 
 
 // set port, listen for requests

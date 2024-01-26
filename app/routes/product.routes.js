@@ -20,7 +20,7 @@ const {
     upload,
 } = require("../controllers/product.controller");
 
-router.route("/createProduct", verifyUser).post(upload.single('image'),createProduct);
+router.route("/createProduct").post(upload.single('image'),createProduct);
 router.route("/getall", authJwt.checkSuspendedAccount).get(getAllProduct);
 router.route("/getDashboard", authJwt.checkSuspendedAccount).get(getDashboard);
 router.route("/search", authJwt.checkSuspendedAccount).get(searchProduct);
