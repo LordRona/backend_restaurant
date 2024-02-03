@@ -21,6 +21,7 @@ const calculateUserBalancePerDay = require("./app/routes/user");
 const user_token = require("./app/routes/user");
 const makeUserVerified = require("./app/routes/user");
 const recomendation = require("./app/routes/recommendation.route");
+const frequentlyBought = require("./app/routes/product.routes");
 
 const app = express();
 
@@ -94,6 +95,7 @@ app.use(`${process.env.API_VERSION}/`, calculateUserBalancePerDay);
 app.use(`${process.env.API_VERSION}/recommendation`, recomendation);
 app.use(`${process.env.API_VERSION}`, user_token);
 app.use(`${process.env.API_VERSION}/verify`, makeUserVerified);
+app.use(`${process.env.API_VERSION}`, frequentlyBought);
 
 
 // set port, listen for requests

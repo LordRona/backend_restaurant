@@ -15,6 +15,7 @@ const {
     getProductByCategory,
     deleteProduct,
     getALLProductsBySingleUser,
+    getMostFrequentlyBoughtProduct,
     getDashboard,
     searchProduct,
     upload,
@@ -25,6 +26,7 @@ router.route("/getall", authJwt.checkSuspendedAccount).get(getAllProduct);
 router.route("/getDashboard", authJwt.checkSuspendedAccount).get(getDashboard);
 router.route("/search", authJwt.checkSuspendedAccount).get(searchProduct);
 router.route("/get-product-category").get(getProductByCategory);
+router.route("/get-frequently-bought").get(getMostFrequentlyBoughtProduct);
 router.route("/getAllProductsBySingleUser/:userId", authJwt.checkSuspendedAccount).get(getALLProductsBySingleUser);
 router.route("/:id", authJwt.checkSuspendedAccount).get(getSingleProduct)/*.patch(updateProduct)*/.delete(deleteProduct);
 

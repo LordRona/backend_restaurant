@@ -2,7 +2,7 @@ const Product  = require("../models/product.model");
 const User = require("../models/user.model");
 const multer = require("multer");
 const sharp = require("sharp");
-const mongoose = require("mongoose")
+const Order = require("../models/order.model")
 const dbConfig = require("../config/db.config");
 const AWS = require("aws-sdk");
 
@@ -168,6 +168,40 @@ const searchProduct = async (req, res) => {
     }
   };
 
+  const getMostFrequentlyBoughtProduct = async(req, res)=>{
+    "use strict"
+    try{
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+  
+      const orders = await Order.find({
+        createdAt: { $gte: today },
+      });
+
+      const productCount = {};
+
+      //count the occurance of each Id
+      orders.forEach((order)=>{
+        const productId = order._id;
+        if (productId) {
+          productCount[productId] = (productCount[productId] || 0) + 1;
+        }
+      });
+
+       // Sort product IDs based on occurrence counts in descending order
+    const sortedProductIds = Object.keys(productCount).sort(
+      (a, b) => productCount[b] - productCount[a]
+    );
+
+    // Retrieve the most frequently ordered product IDs
+    const mostFrequentlyBoughtProductIds = sortedProductIds.slice(0, 10);
+
+    res.json({ mostFrequentlyBoughtProductIds });
+    }catch(error){
+      res.status(404).json({ msg: "Error getting frequently ordered products!" });
+    }
+  }
+
 
 module.exports = {
     createProduct,
@@ -178,6 +212,8 @@ module.exports = {
     getALLProductsBySingleUser,
     getDashboard,
     searchProduct,
+    getALLProductsBySingleUser,
+    getMostFrequentlyBoughtProduct,
     upload,
 }
 
