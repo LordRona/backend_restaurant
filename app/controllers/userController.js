@@ -105,37 +105,6 @@ const calculateUserBalancePerDay = async (req, res) =>{
     }
 }
 
-const createUserToken = async (req, res)=>{
-    try {
-        const token = req.body.token;
-        const user = await User.findOne({ username: req.body.username });
-        const userId = user.id;
-        const isTokenAvailable = await Token.findOne({ userId: userId });
-
-        if(isTokenAvailable){
-            console.log("Token already exists!")
-            return
-        }
-
-        if(!token || !userId){
-            console.log("User not found! or Token not found!")
-            res.status(404).json({ msg: "User not found! or Token not found!" });
-            return;
-        }
-
-        const newToken = new Token({
-            userId,
-            token
-        });
-
-        await newToken.save();
-      
-        res.status(200).json({ newToken });
-    } catch (error) {
-        res.status(404).json({ msg: "Error occured while getting user token!" });
-    }
-}
-
 
 const makeUserVerified = async (req, res) =>{
     // try {
@@ -166,6 +135,5 @@ module.exports = {
     searchUser,
     unsuspendUser,
     calculateUserBalancePerDay,
-    createUserToken,
     makeUserVerified,
 }

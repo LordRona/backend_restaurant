@@ -18,7 +18,7 @@ const userRoute = require("./app/routes/user.routes");
 const orderRoute  = require("./app/routes/orderRoute");
 const searchUser = require("./app/routes/user");
 const calculateUserBalancePerDay = require("./app/routes/user");
-const user_token = require("./app/routes/user");
+const user_token = require("./app/routes/createUserToken");
 const makeUserVerified = require("./app/routes/user");
 const recomendation = require("./app/routes/recommendation.route");
 const frequentlyBought = require("./app/routes/product.routes");
@@ -93,7 +93,7 @@ app.use(`${process.env.API_VERSION}/order`, orderRoute);
 app.use(`${process.env.API_VERSION}/search`, searchUser);
 app.use(`${process.env.API_VERSION}/`, calculateUserBalancePerDay);
 app.use(`${process.env.API_VERSION}/recommendation`, recomendation);
-app.use(`${process.env.API_VERSION}`, user_token);
+app.use(`${process.env.API_VERSION}/token`, user_token);
 app.use(`${process.env.API_VERSION}/verify`, makeUserVerified);
 app.use(`${process.env.API_VERSION}`, frequentlyBought);
 
