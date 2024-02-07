@@ -122,8 +122,48 @@ const getDashboard = async (req, res) =>{
     try{
         const product = await Product.find({})
         .sort({ createdAt: -1 }).limit(20)
+//The below code is to get the most frequently ordered products
+// For a month
+        const today = new Date();
+        const monthAgo = new Date();
+        monthAgo.setMonth(today.getMonth() - 1);
+    
+        const orders = await Order.find({
+          createdAt: { $gte: monthAgo, $lte: today },
+        });
+    
+          const productCount = {};
+    
+          //count the occurance of each Id
+          orders.forEach((order)=>{
+            const productName = order.productName;
+            if (productName) {
+              productCount[productName] = (productCount[productName] || 0) + 1;
+            }
+          });
+    
+           // Sort product IDs based on occurrence counts in descending order
+        const sortedProductNames = Object.keys(productCount).sort(
+          (a, b) => productCount[b] - productCount[a]
+        );
+    
+        // Retrieve the most frequently ordered product IDs
+        const mostFrequentlyBoughtProductNames = sortedProductNames.slice(0, 10);
+        //searching products in the database
+        let products = [];
+    
+        const frequentlyBoughtProducts = await Promise.all(
+          mostFrequentlyBoughtProductNames.map(async (productName) => {
+            try{
+              const product = await Product.findOne({ name: productName });
+              return product;
+            }catch(error){
+              console.log(error);
+            }
+          })
+        );
 
-        res.status(200).json({ product });
+        res.status(200).json({ product, frequentlyBoughtProducts });
     }catch(error){
         res.status(404).json({ message: "Error occured while getting recent product!" });
     }
@@ -172,31 +212,45 @@ const searchProduct = async (req, res) => {
     "use strict"
     try{
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-  
-      const orders = await Order.find({
-        createdAt: { $gte: today },
-      });
+    const monthAgo = new Date();
+    monthAgo.setMonth(today.getMonth() - 1);
+
+    const orders = await Order.find({
+      createdAt: { $gte: monthAgo, $lte: today },
+    });
 
       const productCount = {};
 
       //count the occurance of each Id
       orders.forEach((order)=>{
-        const productId = order._id;
-        if (productId) {
-          productCount[productId] = (productCount[productId] || 0) + 1;
+        const productName = order.productName;
+        if (productName) {
+          productCount[productName] = (productCount[productName] || 0) + 1;
         }
       });
 
        // Sort product IDs based on occurrence counts in descending order
-    const sortedProductIds = Object.keys(productCount).sort(
+    const sortedProductNames = Object.keys(productCount).sort(
       (a, b) => productCount[b] - productCount[a]
     );
 
     // Retrieve the most frequently ordered product IDs
-    const mostFrequentlyBoughtProductIds = sortedProductIds.slice(0, 10);
+    const mostFrequentlyBoughtProductNames = sortedProductNames.slice(0, 10);
+    //searching products in the database
+    let products = [];
 
-    res.json({ mostFrequentlyBoughtProductIds });
+    const frequentlyBoughtProducts = await Promise.all(
+      mostFrequentlyBoughtProductNames.map(async (productName) => {
+        try{
+          const product = await Product.findOne({ name: productName });
+          return product;
+        }catch(error){
+          console.log(error);
+        }
+      })
+    )
+
+    res.status(200).json({ frequentlyBoughtProducts });
     }catch(error){
       res.status(404).json({ msg: "Error getting frequently ordered products!" });
     }

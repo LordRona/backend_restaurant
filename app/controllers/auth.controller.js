@@ -116,7 +116,10 @@ exports.signin = (req, res) => {
         phone: user.phone,
         location: user.location,
         roles: authorities,
-        accessToken: token
+        accessToken: token,
+        verifyUser: user.verifyUser,
+        suspended: user.suspended,
+        hasDelivery: user.hasDelivery,
       });
     });
 };

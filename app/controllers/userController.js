@@ -138,7 +138,7 @@ const createUserToken = async (req, res)=>{
 
 
 const makeUserVerified = async (req, res) =>{
-    try {
+    // try {
      
      const { userId } = req.params;
 
@@ -152,9 +152,9 @@ const makeUserVerified = async (req, res) =>{
      await user.save();
  
      res.status(200).json({ msg: "User verified successfully!" });
-    } catch (error) {
-     res.status(404).json({ msg: "Error while making user verified!"})
-    }
+    // } catch (error) {
+    //  res.status(404).json({ msg: "Error while making user verified!"})
+    // }
  };
 
 
