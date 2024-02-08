@@ -21,7 +21,7 @@ const products = new mongoose.Schema({
         type: String,
         ref: "Category",
         required: [true, "Please provide category field"],
-        enum: ["all", "salad", "local", "pizza", "sandwich", "snacks","burgers"],
+        enum: ["all", "salad", "local", "pizza", "sandwich", "snacks",  "burgers", "cakes", "yoghurt", "african"],
         default: "all"
     },
     image: {

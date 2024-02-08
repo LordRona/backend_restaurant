@@ -45,7 +45,7 @@ const orderSchema = mongoose.model("Order", new mongoose.Schema({
       type: String,
       required: true,
     },
-    deleveryNumber: {
+    deliveryNumber: {
       type: String,
       required: true,
     },
