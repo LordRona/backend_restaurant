@@ -176,6 +176,7 @@ const deleteProduct = async (req, res) =>{
 
     if(!image){
       res.status(200).json("Image not found!");
+      return;
     };
 
      // Delete the image from Firebase Storage
