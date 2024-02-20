@@ -6,9 +6,8 @@ const {
     makeUserVerified,
 } =  require("../controllers/userController");
 
-router.route("/:userId").post(makeUserVerified);
+router.route("/make-user-verified").post(makeUserVerified);
 router.route("/search-user").get(searchUser);
 router.route("/user-balance-per-day").get(calculateUserBalancePerDay);
-
 
 module.exports = router;

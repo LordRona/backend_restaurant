@@ -107,23 +107,19 @@ const calculateUserBalancePerDay = async (req, res) =>{
 
 
 const makeUserVerified = async (req, res) =>{
-    // try {
+    const username = req.body.username;
+    try {
      
-     const { userId } = req.params;
-
-     const user = await User.findById(userId);
-
-     if(!user){
-        res.status(404).json({ msg: "Error occured!" });
-     }
+    const user = await User.findOne({ username });
 
      user.verifyUser = true;
      await user.save();
  
+     console.log(user);
      res.status(200).json({ msg: "User verified successfully!" });
-    // } catch (error) {
-    //  res.status(404).json({ msg: "Error while making user verified!"})
-    // }
+    } catch (error) {
+     res.status(404).json({ msg: "Error while making user verified!"})
+    }
  };
 
 
