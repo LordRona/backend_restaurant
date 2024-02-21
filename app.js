@@ -22,6 +22,7 @@ const user_token = require("./app/routes/createUserToken");
 const makeUserVerified = require("./app/routes/user");
 const recomendation = require("./app/routes/recommendation.route");
 const frequentlyBought = require("./app/routes/product.routes");
+const getUnverifiedUsers = require("./app/routes/user");
 
 const app = express();
 
@@ -95,6 +96,7 @@ app.use(`${process.env.API_VERSION}/`, calculateUserBalancePerDay);
 app.use(`${process.env.API_VERSION}/recommendation`, recomendation);
 app.use(`${process.env.API_VERSION}/token`, user_token);
 app.use(`${process.env.API_VERSION}/verify`, makeUserVerified);
+app.use(`${process.env.API_VERSION}/getUnverifiedUsers`, getUnverifiedUsers);
 app.use(`${process.env.API_VERSION}`, frequentlyBought);
 
 

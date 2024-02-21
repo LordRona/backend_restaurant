@@ -85,7 +85,8 @@ const unsuspendUser = async (req, res) =>{
 }
 
 const searchUser = async (req, res) =>{
-    const { searchWord } = req.query
+    // const searchWord  = req.query.username
+    const searchWord = req.body.username;
 
   try{
     const regex = new RegExp(searchWord, 'i');
@@ -122,6 +123,14 @@ const makeUserVerified = async (req, res) =>{
     }
  };
 
+ const getUnverifiedUsers = async (req, res) =>{
+     try{
+         const users = await User.find({ verifyUser: false });
+         res.status(200).json({ users });
+     }catch(error){
+         res.status(404).json({ msg: "Internal server error!" });
+     }
+ }
 
 module.exports = {
     updateUserPassword,
@@ -132,4 +141,5 @@ module.exports = {
     unsuspendUser,
     calculateUserBalancePerDay,
     makeUserVerified,
+    getUnverifiedUsers,
 }
