@@ -85,8 +85,8 @@ const unsuspendUser = async (req, res) =>{
 }
 
 const searchUser = async (req, res) =>{
-    // const searchWord  = req.query.username
-    const searchWord = req.body.username;
+    const searchWord  = req.query.q;
+    // const searchWord = req.body.username;
 
   try{
     const regex = new RegExp(searchWord, 'i');

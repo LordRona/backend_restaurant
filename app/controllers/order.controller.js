@@ -119,28 +119,15 @@ const getOrdersOfTheDay = async (req, res) =>{
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const order = await Order.find({
+    Order.find({
       createdAt: { $gte: today },
-    });
-
-    const totalPricePerUser = order.reduce((acc, order) => {
-      const { createdBy, price } = order;
-      if (!acc[createdBy]) {
-        acc[createdBy] = {
-          order: [order],
-          totalPrice: price,
-        };
+    }, (err, orders) => {
+      if(err){
+        res.status(500).json({ msg: "Error while getting orders" });
       }else{
-        acc[createdBy].order.push(order);
-        acc[createdBy].totalPrice += price;
+        res.status(200).json({ orders });
       }
-
-      return acc;
-    }, {});
-    console.log(totalPricePerUser);
-    // console.log(order);
-
-    res.json(totalPricePerUser);
+    });
 
   }catch(error){
     res.status(404).json({ message: "Error occured while getting food!" });
